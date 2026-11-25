@@ -34,14 +34,23 @@ jobs:
           name: SoglomHayot-apk
           path: SoglomHayot.apk
 
+      - name: APK ni "apk" shoxobchasiga joylash (doimiy yuklab olish havolasi)
+        run: |
+          mkdir out && cp SoglomHayot.apk out/ && cd out
+          git init -q -b apk
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git add SoglomHayot.apk
+          git commit -q -m "APK ${{ github.run_number }} (${{ github.sha }})"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" apk
+
       - name: Yuklab olish sahifasiga joylash (Releases)
+        continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          ls -la SoglomHayot.apk
-          out=$(gh release create "v1.0.${{ github.run_number }}" SoglomHayot.apk \
+          gh release create "v1.0.${{ github.run_number }}" SoglomHayot.apk \
             --repo "${{ github.repository }}" \
             --target "${{ github.sha }}" \
             --title "Sog'lom Hayot 1.0.${{ github.run_number }}" \
-            --notes "Telefonga yuklab oling va o'rnating (SoglomHayot.apk)." 2>&1) || { echo "::error::$(echo "$out" | tr '\n' ' ')"; exit 1; }
-          echo "$out"
+            --notes "Telefonga yuklab oling va o'rnating (SoglomHayot.apk)."

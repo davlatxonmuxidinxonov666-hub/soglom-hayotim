@@ -8,4 +8,6 @@ Kaloriya hisoblagich (o'zbek taomlari bilan), qadam hisoblagich, suv va vazn kun
 - Kunlik me'yor (Mifflin–San Jeor), maqsad: ozish / saqlash / vazn olish.
 - Tillar: o'zbekcha, ruscha, inglizcha.
 
-APK: **Releases** bo'limidan `SoglomHayot.apk` ni yuklab oling. Har bir push'da GitHub avtomatik yig'adi.
+APK (har doim eng so'nggi versiya): https://github.com/davlatxonmuxidinxonov666-hub/soglom-hayotim/raw/apk/SoglomHayot.apk
+
+Har bir push'da GitHub avtomatik yig'adi.
