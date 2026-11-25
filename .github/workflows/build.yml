@@ -35,9 +35,11 @@ jobs:
           path: SoglomHayot.apk
 
       - name: Yuklab olish sahifasiga joylash (Releases)
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: v1.0.${{ github.run_number }}
-          name: Sog'lom Hayot ${{ github.run_number }}
-          body: Telefonga yuklab oling va o'rnating (SoglomHayot.apk).
-          files: SoglomHayot.apk
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "v1.0.${{ github.run_number }}" SoglomHayot.apk \
+            --repo "${{ github.repository }}" \
+            --target "${{ github.sha }}" \
+            --title "Sog'lom Hayot 1.0.${{ github.run_number }}" \
+            --notes "Telefonga yuklab oling va o'rnating (SoglomHayot.apk)."
