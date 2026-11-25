@@ -38,8 +38,10 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create "v1.0.${{ github.run_number }}" SoglomHayot.apk \
+          ls -la SoglomHayot.apk
+          out=$(gh release create "v1.0.${{ github.run_number }}" SoglomHayot.apk \
             --repo "${{ github.repository }}" \
             --target "${{ github.sha }}" \
             --title "Sog'lom Hayot 1.0.${{ github.run_number }}" \
-            --notes "Telefonga yuklab oling va o'rnating (SoglomHayot.apk)."
+            --notes "Telefonga yuklab oling va o'rnating (SoglomHayot.apk)." 2>&1) || { echo "::error::$(echo "$out" | tr '\n' ' ')"; exit 1; }
+          echo "$out"
