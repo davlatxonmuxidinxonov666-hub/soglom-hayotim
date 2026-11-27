@@ -180,3 +180,4 @@ conv.target_spec.supported_types = [tf.float16]
 open(os.path.join(OUT, 'uz.tflite'), 'wb').write(conv.convert())
 open(os.path.join(OUT, 'uz_labels.txt'), 'w').write('\n'.join(classes))
 say('tayyor:', os.path.getsize(os.path.join(OUT, 'uz.tflite')), 'bayt')
+# v2
