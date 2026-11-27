@@ -5,7 +5,6 @@ import glob
 import os
 import random
 import sys
-import urllib.request
 
 import numpy as np
 import tensorflow as tf
@@ -26,19 +25,11 @@ def say(*a):
     log.flush()
 
 
-# 1) Yaratilgan rasmlar
-items = [l.strip().split('|', 1) for l in open(os.environ.get('GEN', 'ai_data/generated.txt'), encoding='utf-8') if '|' in l]
+# 1) Yaratilgan rasmlar: ai_data/images/<sinf>_NN.jpg (Google Flow / Nano Banana)
 paths, labels = [], []
-for i, (cls, url) in enumerate(items):
-    d = f'/tmp/uzdata/{cls}'
-    os.makedirs(d, exist_ok=True)
-    p = f'{d}/{i}.jpg'
-    if not os.path.exists(p):
-        try:
-            urllib.request.urlretrieve(url, p)
-        except Exception as e:
-            say('yuklab bo\'lmadi', url, e)
-            continue
+IMGDIR = os.environ.get('IMGDIR', 'ai_data/images')
+for p in sorted(glob.glob(os.path.join(IMGDIR, '*.jpg'))):
+    cls = os.path.basename(p).rsplit('_', 1)[0]
     paths.append(p)
     labels.append(cls)
 classes = sorted(set(labels))
