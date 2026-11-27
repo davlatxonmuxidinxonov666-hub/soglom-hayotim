@@ -1,5 +1,6 @@
 const I18N = {
 uz: {
+  aiMaybe: "Balki bulardan biridir? Bosib qo'shing:", aiTeach: "Agar taom ro'yxatda bo'lmasa, yozib kiriting. Ilova hozircha 239 tur taomni taniydi; yangi taomlarni o'rgatish uchun rasmlar to'playmiz.",
   advNorm: "Tavsiya: ≈ {0} kkal (kunlik me'yorning {1}%)", canMore: 'Yana mumkin', overBy: 'Ortiqcha', variant: 'Variant',
   advPick: '≈ {0} kkal ga mos variantlar', advPickFull: "To'liq {0} kkal li variantlar", iAteThis: 'Shuni yedim', close: 'Yopish',
   adv_breakfast: "<b>Nonushta</b> kunni boshlaydi: <b>oqsil</b> (tuxum, tvorog, qatiq, pishloq) va <b>sekin uglevod</b> (suli bo'tqasi, grechka, qora non) bo'lsin. Shirinlik va shakarli choy o'rniga meva qo'shing. Uyg'ongandan keyin 1 soat ichida yeng.",
@@ -8,7 +9,7 @@ uz: {
   adv_dinner: "<b>Kechki ovqat</b> yengil bo'lsin: <b>oqsil + sabzavot</b> (tovuq, baliq, shashlik, dimlama, salat). Yog'li va xamirli taomni kamroq yeng. Uxlashdan 2–3 soat oldin tugating.",
   aiCamera: 'Rasmga olish', aiOr: '— yoki yozib kiriting —', aiLooking: 'Taomni aniqlayapman…', aiLookingHint: 'Telefon ichida, internetsiz',
   aiError: "Rasmni aniqlab bo'lmadi. Qayta urinib ko'ring yoki yozib kiriting.",
-  aiNothing: "Rasmda taom topilmadi. Yorug'roq joyda, tarelkani yaqinroqdan va tepadan rasmga oling yoki yozib kiriting.",
+  aiNothing: "Rasmda taom aniq topilmadi. Yorug'roq joyda, tarelkani yaqinroqdan va tepadan rasmga oling yoki yozib kiriting.",
   aiSaw: "Ko'rindi, lekin bazada yo'q", aiCheck: "Ilova shularni topdi. Tekshiring va miqdorni to'g'rilang — porsiyani rasmdan aniq bilib bo'lmaydi.",
   perMeal: "Qaysi ovqatda qancha yeyish kerak", perMealHint: "Kunlik me'yoringiz shunday taqsimlanadi. Bosing — nima yeyish mumkinligini ko'rasiz.",
   time_breakfast: '07:00–09:00', time_lunch: '12:00–14:00', time_snack: '16:00–17:00', time_dinner: '18:30–20:00',
@@ -89,6 +90,7 @@ uz: {
   n_waterCh: 'Suv eslatmasi', n_waterTitle: 'Suv ichish vaqti 💧', n_waterText: 'Bir stakan suv iching',
 },
 ru: {
+  aiMaybe: 'Может быть, это одно из них? Нажмите, чтобы добавить:', aiTeach: 'Если блюда нет в списке — напишите его текстом. Пока приложение знает 239 видов еды; новые блюда добавим, когда соберём фото.',
   advNorm: 'Рекомендуется: ≈ {0} ккал ({1}% дневной нормы)', canMore: 'Можно ещё', overBy: 'Сверх нормы', variant: 'Вариант',
   advPick: 'Варианты на ≈ {0} ккал', advPickFull: 'Варианты на полные {0} ккал', iAteThis: 'Я это съел', close: 'Закрыть',
   adv_breakfast: '<b>Завтрак</b> запускает день: нужен <b>белок</b> (яйца, творог, катык, сыр) и <b>медленные углеводы</b> (овсянка, гречка, чёрный хлеб). Вместо сладостей и чая с сахаром добавьте фрукт. Завтракайте в течение часа после пробуждения.',
@@ -97,7 +99,7 @@ ru: {
   adv_dinner: '<b>Ужин</b> должен быть лёгким: <b>белок + овощи</b> (курица, рыба, шашлык, димлама, салат). Жирного и мучного поменьше. Закончите ужин за 2–3 часа до сна.',
   aiCamera: 'Сфотографировать еду', aiOr: '— или напишите текстом —', aiLooking: 'Распознаю блюдо…', aiLookingHint: 'Прямо в телефоне, без интернета',
   aiError: 'Не удалось распознать фото. Попробуйте ещё раз или напишите текстом.',
-  aiNothing: 'Еда на фото не найдена. Снимите тарелку ближе, сверху и при хорошем свете — или напишите текстом.',
+  aiNothing: 'Не удалось точно определить блюдо. Снимите тарелку ближе, сверху и при хорошем свете — или напишите текстом.',
   aiSaw: 'Распознано, но нет в базе', aiCheck: 'Вот что нашло приложение. Проверьте и поправьте количество — порцию по фото точно не определить.',
   perMeal: 'Сколько есть в каждый приём пищи', perMealHint: 'Так распределяется ваша дневная норма. Нажмите, чтобы увидеть, что можно съесть.',
   time_breakfast: '07:00–09:00', time_lunch: '12:00–14:00', time_snack: '16:00–17:00', time_dinner: '18:30–20:00',
@@ -178,6 +180,7 @@ ru: {
   n_waterCh: 'Напоминание о воде', n_waterTitle: 'Время пить воду 💧', n_waterText: 'Выпейте стакан воды',
 },
 en: {
+  aiMaybe: 'Maybe it is one of these? Tap to add:', aiTeach: "If your dish isn't listed, type it. The app knows 239 foods so far; new dishes will be added as we collect photos.",
   advNorm: 'Recommended: ≈ {0} kcal ({1}% of your daily target)', canMore: 'You can still eat', overBy: 'Over by', variant: 'Option',
   advPick: 'Options for ≈ {0} kcal', advPickFull: 'Options for the full {0} kcal', iAteThis: 'I ate this', close: 'Close',
   adv_breakfast: '<b>Breakfast</b> starts your day: include <b>protein</b> (eggs, cottage cheese, katyk, cheese) and <b>slow carbs</b> (oatmeal, buckwheat, rye bread). Add fruit instead of sweets and sugary tea. Eat within an hour of waking up.',

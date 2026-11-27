@@ -4,6 +4,7 @@
 // Qiymatlar o'rtacha: uyda tayyorlangan taomning kaloriyasi retsept va yog' miqdoriga qarab farq qiladi.
 const FOOD_DATA = `
 osh|uz|250,7,14,24|Osh (palov)|Плов|Plov (pilaf)|palov,plov,плов,плова,ош,палов,osh,oshi,toshkent oshi,samarqand oshi,to'y oshi,choyxona oshi,oshdan,oshni|tarelka:350,kosa:350,lagan:350|
+makaron_osh|uz|200,7,9,23|Makaron palov|Макаронный плов (макарон палав)|Pasta plov|makaron palov,makaron osh,makaronli osh,makaron palav,макаронный плов,макарон палав,макарон плов,макарон-палав,pasta plov|tarelka:300|
 shivit_osh|uz|190,6,8,23|Shivit oshi|Шивит оши (зелёный плов)|Shivit oshi (green plov)|shivit oshi,shivit osh,зеленый плов,шивит|tarelka:350|
 mastava|uz|75,4,3,8|Mastava|Мастава|Mastava (rice soup)|mastava,мастава,маставу,mastava sho'rva|kosa:400|h
 moshkichiri|uz|130,6,4,18|Moshkichiri|Мошкичири|Moshkichiri (mung bean rice)|moshkichiri,moshkichir,mashkichiri,mashkichir,moshkichri,мошкичири,мошкичир,машкичири,машкичир|tarelka:350|h

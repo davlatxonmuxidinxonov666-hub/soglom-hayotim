@@ -85,9 +85,20 @@ final class AiDetector {
         return uni <= 0 ? 0 : inter / uni;
     }
 
-    /** Natija: [{label, score, count}], ishonch bo'yicha tartiblangan. */
-    synchronized String detect(Bitmap src) throws Exception {
-        Bitmap bm = Bitmap.createScaledBitmap(src, size, size, true);
+    /** Rasmni modelga tayyorlash: cho'zib (stretch) yoki proporsiyani saqlab (letterbox, kulrang chekka bilan). */
+    private ByteBuffer prepare(Bitmap src, boolean letterbox) {
+        Bitmap bm;
+        if (!letterbox) {
+            bm = Bitmap.createScaledBitmap(src, size, size, true);
+        } else {
+            float r = (float) size / Math.max(src.getWidth(), src.getHeight());
+            int w = Math.max(1, Math.round(src.getWidth() * r)), h = Math.max(1, Math.round(src.getHeight() * r));
+            Bitmap scaled = Bitmap.createScaledBitmap(src, w, h, true);
+            bm = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
+            android.graphics.Canvas cv = new android.graphics.Canvas(bm);
+            cv.drawColor(0xFF727272);
+            cv.drawBitmap(scaled, (size - w) / 2f, (size - h) / 2f, null);
+        }
         ByteBuffer input = ByteBuffer.allocateDirect(4 * size * size * 3).order(ByteOrder.nativeOrder());
         int[] px = new int[size * size];
         bm.getPixels(px, 0, size, 0, 0, size, size);
@@ -97,19 +108,23 @@ final class AiDetector {
             input.putFloat((p & 0xFF) / 255f);
         }
         input.rewind();
+        return input;
+    }
 
+    /** Bitta o'tish: sinf -> [eng yuqori ishonch, soni]; bestAny — har bir sinf uchun eng yuqori ishonch (taxminlar uchun). */
+    private void pass(ByteBuffer input, Map<Integer, float[]> agg, float[] bestAny) {
         float[][][] out = channelsFirst ? new float[1][nc + 4][n] : new float[1][n][nc + 4];
         tfl.run(input, out);
-
         List<Box> boxes = new ArrayList<>();
         for (int i = 0; i < n; i++) {
             int best = -1;
             float bs = 0;
             for (int k = 0; k < nc; k++) {
                 float s = channelsFirst ? out[0][4 + k][i] : out[0][i][4 + k];
+                if (s > bestAny[k]) bestAny[k] = s;
                 if (s > bs) { bs = s; best = k; }
             }
-            if (bs < 0.30f) continue;
+            if (bs < 0.25f) continue;
             Box b = new Box();
             b.cls = best; b.score = bs;
             if (channelsFirst) { b.x = out[0][0][i]; b.y = out[0][1][i]; b.w = out[0][2][i]; b.h = out[0][3][i]; }
@@ -122,16 +137,32 @@ final class AiDetector {
             boolean ok = true;
             for (Box k : keep) if (k.cls == b.cls && iou(k, b) > 0.5f) { ok = false; break; }
             if (ok) keep.add(b);
-            if (keep.size() >= 30) break;
+            if (keep.size() >= 40) break;
         }
-        Map<Integer, float[]> agg = new LinkedHashMap<>(); // cls -> [bestScore, count]
+        Map<Integer, float[]> local = new LinkedHashMap<>();
         for (Box b : keep) {
-            float[] a = agg.get(b.cls);
-            if (a == null) agg.put(b.cls, new float[]{b.score, 1});
+            float[] a = local.get(b.cls);
+            if (a == null) local.put(b.cls, new float[]{b.score, 1});
             else a[1] += 1;
         }
+        for (Map.Entry<Integer, float[]> e : local.entrySet()) {
+            float[] a = agg.get(e.getKey());
+            if (a == null) agg.put(e.getKey(), e.getValue().clone());
+            else { a[0] = Math.max(a[0], e.getValue()[0]); a[1] = Math.max(a[1], e.getValue()[1]); }
+        }
+    }
+
+    /** Natija: {found:[{label, score, count}], guesses:[{label, score}]}. Ikki usulda tekshiriladi va natijalar birlashtiriladi. */
+    synchronized String detect(Bitmap src) throws Exception {
+        Map<Integer, float[]> agg = new LinkedHashMap<>();
+        float[] bestAny = new float[nc];
+        pass(prepare(src, true), agg, bestAny);
+        pass(prepare(src, false), agg, bestAny);
+
+        List<Map.Entry<Integer, float[]>> found = new ArrayList<>(agg.entrySet());
+        Collections.sort(found, (a, b) -> Float.compare(b.getValue()[0], a.getValue()[0]));
         JSONArray arr = new JSONArray();
-        for (Map.Entry<Integer, float[]> e : agg.entrySet()) {
+        for (Map.Entry<Integer, float[]> e : found) {
             JSONObject o = new JSONObject();
             int c = e.getKey();
             o.put("label", c < labels.size() ? labels.get(c) : ("class_" + c));
@@ -139,6 +170,23 @@ final class AiDetector {
             o.put("count", (int) e.getValue()[1]);
             arr.put(o);
         }
-        return arr.toString();
+        // Taxminlar: ishonchi pastroq, lekin eng yaqin 5 ta variant
+        Integer[] idx = new Integer[nc];
+        for (int i = 0; i < nc; i++) idx[i] = i;
+        java.util.Arrays.sort(idx, (a, b) -> Float.compare(bestAny[b], bestAny[a]));
+        JSONArray g = new JSONArray();
+        for (int i = 0; i < nc && g.length() < 6; i++) {
+            int c = idx[i];
+            if (bestAny[c] < 0.05f) break;
+            if (agg.containsKey(c)) continue;
+            JSONObject o = new JSONObject();
+            o.put("label", labels.get(c));
+            o.put("score", Math.round(bestAny[c] * 100) / 100.0);
+            g.put(o);
+        }
+        JSONObject res = new JSONObject();
+        res.put("found", arr);
+        res.put("guesses", g);
+        return res.toString();
     }
 }

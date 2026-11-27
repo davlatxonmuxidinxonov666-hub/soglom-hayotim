@@ -377,7 +377,9 @@ function aiFood(label) {
   return null;
 }
 function aiPhoto(camera) { if (camera) AND.takePhoto(); else AND.pickPhoto(); }
-window.onAiResult = function (state, list, thumb) {
+window.onAiResult = function (state, res, thumb) {
+  const list = res && res.found ? res.found : (Array.isArray(res) ? res : []);
+  const guessRaw = res && res.guesses ? res.guesses : [];
   if (state === 'busy') {
     openModal(`<div class="aiwait"><div class="scan"><i>🍽️</i></div><h2>${t('aiLooking')}</h2><p class="hint">${t('aiLookingHint')}</p></div>`);
     return;
@@ -395,8 +397,13 @@ window.onAiResult = function (state, list, thumb) {
     r.ai = Math.round(d.score * 100);
     items.push(r);
   });
+  const guesses = [];
+  guessRaw.forEach(g => {
+    const f = aiFood(g.label);
+    if (f && !items.some(x => x.food === f) && !guesses.some(x => x.f === f)) guesses.push({ f, score: Math.round(g.score * 100) });
+  });
   if (tab !== 'food') go('food');
-  parsed = { items, unknown, thumb };
+  parsed = { items, unknown, thumb, guesses: guesses.slice(0, 5) };
   renderParsed();
   setTimeout(() => { const e = $('#parseOut'); if (e) e.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 100);
 };
@@ -453,7 +460,7 @@ function renderParsed() {
   const out = $('#parseOut');
   if (!out || !parsed) return;
   if (!parsed.items.length) {
-    if (parsed.thumb) { out.innerHTML = `<div class="res warnbox"><img class="thumb" src="${parsed.thumb}">${t('aiNothing')}${parsed.unknown.length ? '<br>' + t('aiSaw') + ': <b>' + esc(parsed.unknown.join(', ')) + '</b>' : ''}</div>`; return; }
+    if (parsed.thumb) { out.innerHTML = `<div class="res warnbox"><img class="thumb" src="${parsed.thumb}">${t('aiNothing')}${parsed.unknown.length ? '<br>' + t('aiSaw') + ': <b>' + esc(parsed.unknown.join(', ')) + '</b>' : ''}</div>${guessChips()}`; return; }
     out.innerHTML = `<div class="res warnbox">${t('notFound')}${parsed.unknown.length ? ': <b>' + esc(parsed.unknown.join(', ')) + '</b>' : ''}<br>${t('notFoundHint')}</div>`;
     return;
   }
@@ -471,8 +478,19 @@ function renderParsed() {
   });
   out.innerHTML = `<div class="res pop">${parsed.thumb ? `<div class="aihead"><img class="thumb" src="${parsed.thumb}"><p>${t('aiCheck')}</p></div>` : ''}${rows}
     ${parsed.unknown.length ? `<p class="hint">❓ ${t('unknownWords')}: <b>${esc(parsed.unknown.join(', '))}</b> — ${t('unknownHint')}</p>` : ''}
+    ${guessChips()}
     <div class="ptotal"><span>${t('total')}</span><b>${fmt(sum)} ${t('kcal')}</b></div>
     <button class="btn primary" onclick="addParsed()">✓ ${t('addTo', t('meal_' + selMeal))}</button></div>`;
+}
+function guessChips() {
+  if (!parsed || !parsed.guesses || !parsed.guesses.length) return '';
+  return `<div class="guess"><b>🤔 ${t('aiMaybe')}</b><div class="chips">${parsed.guesses.map((g, i) => `<button class="chip light" onclick="addGuess(${i})">+ ${esc(fname(g.f))} <small>${g.score}%</small></button>`).join('')}</div><p class="hint">${t('aiTeach')}</p></div>`;
+}
+function addGuess(i) {
+  const g = parsed.guesses.splice(i, 1)[0];
+  const r = resolve({ food: g.f, q: null, u: null, mul: 1 });
+  parsed.items.push(r);
+  renderParsed();
 }
 function pEdit(i, k, v) {
   const it = parsed.items[i];
