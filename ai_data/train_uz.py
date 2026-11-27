@@ -37,6 +37,19 @@ say('yaratilgan rasmlar:', len(paths), {c: labels.count(c) for c in classes})
 
 # 2) "Boshqa ovqat" — ISSAI bazasidan (chuchvaraga o'xshash tushpara sinflari chiqarib tashlanadi)
 z = None
+if CAFSD == 'hf':
+    # Hugging Face: fayllar ro'yxatini olib, zip arxivni qismlab o'qish (Range so'rovlari tez ishlaydi)
+    try:
+        import json as _j
+        import urllib.request as _u
+        api = 'https://huggingface.co/api/datasets/issai/Central_Asian_Food_Scenes_Dataset/tree/main?recursive=1'
+        files = _j.load(_u.urlopen(api, timeout=60))
+        zips = sorted([f for f in files if f.get('path', '').lower().endswith('.zip')], key=lambda f: -f.get('size', 0))
+        say('HF fayllar:', [(f['path'], f.get('size')) for f in files][:20])
+        if zips:
+            CAFSD = 'https://huggingface.co/datasets/issai/Central_Asian_Food_Scenes_Dataset/resolve/main/' + zips[0]['path']
+    except Exception as e:
+        say('HF ro\'yxati olinmadi:', e)
 if CAFSD.startswith('http'):
     # Butun arxivni emas, faqat kerakli rasmlarni yuklab olish (HTTP Range)
     try:
@@ -49,16 +62,21 @@ elif CAFSD.endswith('.zip') and os.path.exists(CAFSD):
     z = zipfile.ZipFile(CAFSD)
 if z is not None:
     allnames = z.namelist()
-    imgs = [n for n in allnames if n.lower().endswith(('.jpg', '.jpeg', '.png')) and '/images/' in n]
+    imgs = [n for n in allnames if n.lower().endswith(('.jpg', '.jpeg', '.png')) and 'images/' in n]
     say('ISSAI arxivida rasmlar:', len(imgs))
     random.shuffle(imgs)
     nameset = set(allnames)
     got = 0
-    for n in imgs[:1300]:
+    import time
+    t0 = time.time()
+    for n in imgs[:700]:
+        if time.time() - t0 > 1500:
+            say('vaqt tugadi, olingan rasmlar bilan davom etamiz')
+            break
         try:
             z.extract(n, '/tmp/cafsd')
             got += 1
-            ln = n.replace('/images/', '/labels/').rsplit('.', 1)[0] + '.txt'
+            ln = n.replace('images/', 'labels/').rsplit('.', 1)[0] + '.txt'
             if ln in nameset:
                 z.extract(ln, '/tmp/cafsd')
         except Exception as e:
@@ -70,7 +88,7 @@ names = open(os.path.join(OUT, 'labels.txt'), encoding='utf-8').read().split('\n
 excl = {i for i, n in enumerate(names) if n.startswith('tushpara')}
 others = []
 for p in glob.glob(os.path.join(CAFSD, '**', '*.jpg'), recursive=True) + glob.glob(os.path.join(CAFSD, '**', '*.png'), recursive=True):
-    lbl = p.replace('/images/', '/labels/').rsplit('.', 1)[0] + '.txt'
+    lbl = p.replace('images/', 'labels/').rsplit('.', 1)[0] + '.txt'
     if os.path.exists(lbl):
         try:
             ids = {int(line.split()[0]) for line in open(lbl) if line.strip()}
@@ -80,7 +98,7 @@ for p in glob.glob(os.path.join(CAFSD, '**', '*.jpg'), recursive=True) + glob.gl
             pass
     others.append(p)
 random.shuffle(others)
-others = others[:900]
+others = others[:500]
 say('boshqa ovqat rasmlari:', len(others))
 ngen = len(paths)
 if others:

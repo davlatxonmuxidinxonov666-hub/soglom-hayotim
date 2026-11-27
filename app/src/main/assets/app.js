@@ -403,11 +403,8 @@ window.onAiResult = function (state, res, thumb) {
   uzList.forEach((u, k) => {
     const f = FOODS[u.label];
     if (items.some(x => x.food === f)) return;
-    if (k === 0 && u.score >= 0.55) {
-      const r = resolve({ food: f, q: null, u: null, mul: 1 });
-      r.ai = Math.round(u.score * 100);
-      items.unshift(r);
-    } else if (u.score >= 0.15) guesses.push({ f, score: Math.round(u.score * 100) });
+    // Sinov modeli: faqat taklif sifatida ko'rsatiladi, avtomatik qo'shilmaydi
+    if (u.score >= 0.25) guesses.push({ f, score: Math.round(u.score * 100) });
   });
   guessRaw.forEach(g => {
     const f = aiFood(g.label);
