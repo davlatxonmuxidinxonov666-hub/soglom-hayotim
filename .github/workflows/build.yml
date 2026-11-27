@@ -57,7 +57,7 @@ jobs:
           fail() { echo "::error title=$1::$(tail -c 3000 /tmp/m/log.txt | tr '\n' ' ')"; rm -rf "${{ github.workspace }}/app/src/main/assets/ai"; exit 1; }
           curl -fL --retry 3 -o /tmp/m/cafsd.pt https://issai.nu.edu.kz/wp-content/themes/issai-new/data/models/CAFSD/yolov8n.pt > /tmp/m/log_dl.txt 2>&1 || { cp /tmp/m/log_dl.txt /tmp/m/log.txt; fail "yuklab olish"; }
           ls -la /tmp/m/cafsd.pt
-          pip install "ultralytics>=8.3,<8.5" > /tmp/m/log_pip.txt 2>&1 || { cp /tmp/m/log_pip.txt /tmp/m/log.txt; fail "pip"; }
+          pip install "ultralytics==8.3.100" > /tmp/m/log_pip.txt 2>&1 || { cp /tmp/m/log_pip.txt /tmp/m/log.txt; fail "pip"; }
           cd /tmp/m && python conv.py "${{ github.workspace }}/app/src/main/assets/ai" > /tmp/m/log.txt 2>&1 || fail "eksport"
           tail -5 /tmp/m/log.txt
           ls -la "${{ github.workspace }}/app/src/main/assets/ai"
