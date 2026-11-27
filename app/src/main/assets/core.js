@@ -171,7 +171,7 @@ const UNIT_RE = [
   ['dona', /^(ta|dona\w*|sht\w*|piece\w*|pcs)$/, 1],
   ['tarelka', /^(tarel\w*|likopch\w*|plate\w*)$/, 1],
   ['lagan', /^(lagan\w*)$/, 1],
-  ['kosa', /^(kosa\w*|bowl\w*|misk\w*|chashk\w*)$/, 1],
+  ['kosa', /^(kosa\w*|kosushk\w*|bowl\w*|misk\w*|chashk\w*)$/, 1],
   ['piyola', /^(piyol\w*|pial\w*|cup\w*|krujk\w*|kruzhk\w*)$/, 1],
   ['stakan', /^(stakan\w*|glass\w*)$/, 1],
   ['oshqoshiq', /^(tbsp)$/, 1],
@@ -214,11 +214,28 @@ function parseMeal(text) {
     last = it; pq = null; pu = null; pmul = 1;
     return i + m.len;
   };
+  // Keyingi taomning o'z miqdori bormi ("norin 300g bulochka 200g")
+  const nextHasQty = j => {
+    const u = toks[j] ? unitAt(toks, j) : null;
+    if (u) j += u.len;
+    if (j >= toks.length || toks[j].k === ',') return false;
+    const m = matchFood(toks, j, 1);
+    if (!m) return false;
+    const k = j + m.len;
+    return k < toks.length && !!numberAt(toks, k);
+  };
   const foodAhead = j => {
     const u = toks[j] ? unitAt(toks, j) : null;
     if (u) j += u.len;
     return j < toks.length && toks[j].k !== ',' && !!matchFood(toks, j, 1);
   };
+  // Yozish uslubi: "osh 300g" (avval taom) yoki "300g osh" (avval miqdor)
+  let foodFirst = false;
+  for (let j = 0; j < toks.length; j++) {
+    if (SEP.has(toks[j].k) || STOP.has(toks[j].k)) continue;
+    if (numberAt(toks, j) || unitAt(toks, j)) break;
+    if (matchFood(toks, j, 1)) { foodFirst = true; break; }
+  }
   for (let i = 0; i < toks.length;) {
     const tk = toks[i];
     if (SEP.has(tk.k)) { last = null; i++; continue; }
@@ -229,14 +246,14 @@ function parseMeal(text) {
     }
     const n = numberAt(toks, i);
     if (n) {
-      const trailing = last && last.q === null && pq === null && !foodAhead(i + n.len);
+      const trailing = last && last.q === null && pq === null && (!foodAhead(i + n.len) || (foodFirst && nextHasQty(i + n.len)));
       if (trailing) { last.q = n.v; if (n.dona && !last.u) last.u = 'dona'; }
       else { pq = n.v; if (n.dona) pu = 'dona'; }
       i += n.len; continue;
     }
     const u = unitAt(toks, i);
     if (u) {
-      if (last && last.u === null && pq === null && pu === null && !foodAhead(i + u.len)) { last.u = u.unit; last.mul = u.mul; }
+      if (last && last.u === null && pq === null && pu === null && (!foodAhead(i + u.len) || (foodFirst && nextHasQty(i + u.len)))) { last.u = u.unit; last.mul = u.mul; }
       else { pu = u.unit; pmul = u.mul; }
       i += u.len; continue;
     }
