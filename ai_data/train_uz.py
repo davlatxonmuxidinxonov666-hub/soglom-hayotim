@@ -38,18 +38,41 @@ say('yaratilgan rasmlar:', len(paths), {c: labels.count(c) for c in classes})
 # 2) "Boshqa ovqat" — ISSAI bazasidan (chuchvaraga o'xshash tushpara sinflari chiqarib tashlanadi)
 z = None
 if CAFSD == 'hf':
-    # Hugging Face: fayllar ro'yxatini olib, zip arxivni qismlab o'qish (Range so'rovlari tez ishlaydi)
+    # Hugging Face: test qismidagi alohida rasmlar va ularning belgilari (labels)
+    import json as _j
+    import time
+    import urllib.request as _u
+    base = 'https://huggingface.co/datasets/issai/Central_Asian_Food_Scenes_Dataset/resolve/main/'
+    os.makedirs('/tmp/cafsd/images', exist_ok=True)
+    os.makedirs('/tmp/cafsd/labels', exist_ok=True)
     try:
-        import json as _j
-        import urllib.request as _u
-        api = 'https://huggingface.co/api/datasets/issai/Central_Asian_Food_Scenes_Dataset/tree/main?recursive=1'
-        files = _j.load(_u.urlopen(api, timeout=60))
-        zips = sorted([f for f in files if f.get('path', '').lower().endswith('.zip')], key=lambda f: -f.get('size', 0))
-        say('HF fayllar:', [(f['path'], f.get('size')) for f in files][:20])
-        if zips:
-            CAFSD = 'https://huggingface.co/datasets/issai/Central_Asian_Food_Scenes_Dataset/resolve/main/' + zips[0]['path']
+        lst, url = [], 'https://huggingface.co/api/datasets/issai/Central_Asian_Food_Scenes_Dataset/tree/main/CAFSD/test/images'
+        while url and len(lst) < 3000:
+            r = _u.urlopen(url, timeout=60)
+            lst += [f['path'] for f in _j.load(r) if f.get('type') == 'file']
+            link = r.headers.get('Link', '') or ''
+            url = link.split('<')[1].split('>')[0] if 'rel="next"' in link else None
+        say('HF test rasmlari:', len(lst))
+        random.shuffle(lst)
+        t0, got = time.time(), 0
+        for pth in lst[:550]:
+            if time.time() - t0 > 900:
+                break
+            name = os.path.basename(pth)
+            try:
+                _u.urlretrieve(base + pth, '/tmp/cafsd/images/' + name)
+                lp = pth.replace('/images/', '/labels/').rsplit('.', 1)[0] + '.txt'
+                try:
+                    _u.urlretrieve(base + lp, '/tmp/cafsd/labels/' + name.rsplit('.', 1)[0] + '.txt')
+                except Exception:
+                    pass
+                got += 1
+            except Exception as e:
+                say('xato', pth, e)
+        say('HF dan olindi:', got, 'soniya:', int(time.time() - t0))
     except Exception as e:
-        say('HF ro\'yxati olinmadi:', e)
+        say('HF xato:', e)
+    CAFSD = '/tmp/cafsd'
 if CAFSD.startswith('http'):
     # Butun arxivni emas, faqat kerakli rasmlarni yuklab olish (HTTP Range)
     try:
