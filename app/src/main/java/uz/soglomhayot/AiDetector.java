@@ -33,6 +33,10 @@ final class AiDetector {
     private final int size;
     private final boolean channelsFirst; // chiqish: [1, 4+nc, N] yoki [1, N, 4+nc]
     private final int nc, n;
+    // Qo'shimcha: o'zbek taomlari klassifikatori (MobileNetV3), bo'lmasligi ham mumkin
+    private Interpreter uz;
+    private final List<String> uzLabels = new ArrayList<>();
+    private int uzSize = 224;
 
     static boolean available(Context c) {
         try {
@@ -63,6 +67,21 @@ final class AiDetector {
         try (BufferedReader r = new BufferedReader(new InputStreamReader(c.getAssets().open("ai/labels.txt"), "UTF-8"))) {
             String line;
             while ((line = r.readLine()) != null) labels.add(line.trim());
+        }
+        try {
+            AssetFileDescriptor fu = c.getAssets().openFd("ai/uz.tflite");
+            MappedByteBuffer um;
+            try (FileInputStream in = new FileInputStream(fu.getFileDescriptor())) {
+                um = in.getChannel().map(FileChannel.MapMode.READ_ONLY, fu.getStartOffset(), fu.getDeclaredLength());
+            }
+            uz = new Interpreter(um, o);
+            try (BufferedReader r = new BufferedReader(new InputStreamReader(c.getAssets().open("ai/uz_labels.txt"), "UTF-8"))) {
+                String line;
+                while ((line = r.readLine()) != null) if (!line.trim().isEmpty()) uzLabels.add(line.trim());
+            }
+            uzSize = uz.getInputTensor(0).shape()[1];
+        } catch (Exception e) {
+            uz = null;
         }
         int[] in = tfl.getInputTensor(0).shape();   // [1, H, W, 3]
         size = in[1];
@@ -187,6 +206,28 @@ final class AiDetector {
         JSONObject res = new JSONObject();
         res.put("found", arr);
         res.put("guesses", g);
+        if (uz != null) {
+            Bitmap bm = Bitmap.createScaledBitmap(src, uzSize, uzSize, true);
+            ByteBuffer in2 = ByteBuffer.allocateDirect(4 * uzSize * uzSize * 3).order(ByteOrder.nativeOrder());
+            int[] px = new int[uzSize * uzSize];
+            bm.getPixels(px, 0, uzSize, 0, 0, uzSize, uzSize);
+            for (int p : px) {   // model o'zi 0..255 ni normallashtiradi
+                in2.putFloat((p >> 16) & 0xFF);
+                in2.putFloat((p >> 8) & 0xFF);
+                in2.putFloat(p & 0xFF);
+            }
+            in2.rewind();
+            float[][] prob = new float[1][uzLabels.size()];
+            uz.run(in2, prob);
+            JSONArray ua = new JSONArray();
+            for (int i = 0; i < uzLabels.size(); i++) {
+                JSONObject o = new JSONObject();
+                o.put("label", uzLabels.get(i));
+                o.put("score", Math.round(prob[0][i] * 100) / 100.0);
+                ua.put(o);
+            }
+            res.put("uz", ua);
+        }
         return res.toString();
     }
 }

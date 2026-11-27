@@ -398,6 +398,17 @@ window.onAiResult = function (state, res, thumb) {
     items.push(r);
   });
   const guesses = [];
+  // O'zbek taomlari modeli: aniq bo'lsa — natijaga, shubhali bo'lsa — taxminlar boshiga
+  const uzList = (res && res.uz ? res.uz : []).filter(u => u.label !== 'other' && FOODS[u.label]).sort((a, b) => b.score - a.score);
+  uzList.forEach((u, k) => {
+    const f = FOODS[u.label];
+    if (items.some(x => x.food === f)) return;
+    if (k === 0 && u.score >= 0.55) {
+      const r = resolve({ food: f, q: null, u: null, mul: 1 });
+      r.ai = Math.round(u.score * 100);
+      items.unshift(r);
+    } else if (u.score >= 0.15) guesses.push({ f, score: Math.round(u.score * 100) });
+  });
   guessRaw.forEach(g => {
     const f = aiFood(g.label);
     if (f && !items.some(x => x.food === f) && !guesses.some(x => x.f === f)) guesses.push({ f, score: Math.round(g.score * 100) });
