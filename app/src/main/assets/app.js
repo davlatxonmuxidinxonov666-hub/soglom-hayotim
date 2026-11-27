@@ -96,34 +96,102 @@ function dayCalc(d) {
 }
 
 // ---------- Navigatsiya ----------
+const CAT_ICON = { uz: '🍲', non: '🥖', meat: '🍗', garnish: '🍚', dairy: '🥛', salad: '🥗', fruit: '🍎', nuts: '🥜',
+  sweet: '🍰', drink: '🥤', fast: '🍔', other: '🧂', custom: '⭐', all: '🍽️' };
+const MEAL_ICON = { breakfast: '🌅', lunch: '☀️', snack: '🍏', dinner: '🌙' };
+const REDUCED = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
 function go(name) {
   tab = name;
   document.querySelectorAll('.nav button').forEach(b => b.classList.toggle('on', b.dataset.tab === name));
-  render();
+  render(true);
   window.scrollTo(0, 0);
 }
-function render() {
+function render(animate) {
   refreshSteps();
   $('#nav').style.display = profile ? '' : 'none';
   document.querySelectorAll('.nav button').forEach(b => { b.querySelector('span').textContent = t('tab_' + b.dataset.tab); });
   const v = $('#view');
-  if (!profile) { v.innerHTML = renderProfile(); return; }
-  v.innerHTML = { home: renderHome, food: renderFood, activity: renderActivity, plan: renderPlan, profile: renderProfile }[tab]();
-  if (tab === 'food') { renderParsed(); renderFoodList(); }
+  if (!profile) v.innerHTML = store.get('intro', false) ? renderProfile() : renderIntro();
+  else v.innerHTML = { home: renderHome, food: renderFood, activity: renderActivity, plan: renderPlan, profile: renderProfile }[tab]();
+  if (profile && tab === 'food') { renderParsed(); renderFoodList(); }
+  v.classList.remove('anim');
+  if (animate && !REDUCED) {
+    void v.offsetWidth;
+    v.classList.add('anim');
+    [...v.children].forEach((el, i) => el.style.animationDelay = Math.min(i, 8) * 55 + 'ms');
+    countUp(v);
+  }
+}
+// Raqamlarni 0 dan sanab chiqarish
+function countUp(root) {
+  root.querySelectorAll('[data-n]').forEach(el => {
+    const end = parseFloat(el.dataset.n), dec = parseInt(el.dataset.d || '0'), pre = el.dataset.p || '';
+    const t0 = performance.now(), dur = 800;
+    const step = now => {
+      const k = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - k, 3), v = end * e;
+      el.textContent = pre + (dec ? v.toFixed(dec) : fmt(v));
+      if (k < 1) requestAnimationFrame(step);
+    };
+    el.textContent = pre + (dec ? (0).toFixed(dec) : '0');
+    requestAnimationFrame(step);
+  });
+}
+function num(v, pre = '', dec = 0) {
+  return `<b data-n="${v}" data-p="${pre}" data-d="${dec}">${pre}${dec ? (+v).toFixed(dec) : fmt(v)}</b>`;
+}
+
+// ---------- Tanishtiruv ----------
+let introStep = 0;
+function renderIntro() {
+  const slides = [['🍽️', 'intro1t', 'intro1'], ['✍️', 'intro2t', 'intro2'], ['👟', 'intro3t', 'intro3'], ['🎯', 'intro4t', 'intro4']];
+  const [ic, tt, tx] = slides[introStep];
+  const langs = introStep === 0 ? `<div class="chips center">${['uz', 'ru', 'en'].map(l => `<button class="chip ${lang === l ? 'on' : ''}" onclick="setLang('${l}')">${{ uz: "O'zbekcha", ru: 'Русский', en: 'English' }[l]}</button>`).join('')}</div>` : '';
+  return `<div class="intro">
+    <div class="introIcon" key="${introStep}">${ic}</div>
+    <h1>${introStep === 0 ? "Sog'lom Hayot" : t(tt)}</h1>
+    ${introStep === 0 ? `<h3>${t(tt)}</h3>` : ''}
+    <p>${t(tx)}</p>
+    ${langs}
+    <div class="dots">${slides.map((_, i) => `<i class="${i === introStep ? 'on' : ''}"></i>`).join('')}</div>
+    <button class="btn primary big" onclick="introNext()">${introStep < slides.length - 1 ? t('next') + ' →' : t('letsStart')}</button>
+    ${introStep < slides.length - 1 ? `<button class="btn link" onclick="introStep=${slides.length - 1};render(true)">${t('skip')}</button>` : ''}
+  </div>`;
+}
+function introNext() {
+  if (introStep < 3) { introStep++; render(true); return; }
+  store.set('intro', true); render(true);
 }
 
 // ---------- Bosh sahifa ----------
 function ring(pct, color, size = 132, stroke = 12) {
   const r = (size - stroke) / 2, c = 2 * Math.PI * r;
-  const p = Math.max(0, Math.min(1, pct));
+  const p = Math.max(0, Math.min(1, pct || 0));
   return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}"><circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="var(--track)" stroke-width="${stroke}"/>
-  <circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="${color}" stroke-width="${stroke}" stroke-linecap="round"
+  <circle class="prog" style="--c:${c}" cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="${color}" stroke-width="${stroke}" stroke-linecap="round"
    stroke-dasharray="${c}" stroke-dashoffset="${c * (1 - p)}" transform="rotate(-90 ${size/2} ${size/2})"/></svg>`;
 }
-function bar(label, val, goal, color) {
+function bar(label, val, goal, color, icon) {
   const p = goal ? Math.min(100, val / goal * 100) : 0;
-  return `<div class="mbar"><div class="mrow"><span>${label}</span><b>${Math.round(val)} / ${goal} ${t('gr')}</b></div>
+  return `<div class="mbar"><div class="mrow"><span>${icon} ${label}</span><b>${Math.round(val)} <small>/ ${goal} ${t('gr')}</small></b></div>
     <div class="track"><i style="width:${p}%;background:${color}"></i></div></div>`;
+}
+function startCard() {
+  if (settings.guideDone) return '';
+  const anyFood = Object.values(days).some(d => d.food && d.food.length);
+  const stepsOk = !AND || AND.sensor() === 'none' || AND.stepsOn();
+  const steps = [
+    [true, t('g1'), ''],
+    [anyFood, t('g2'), "openAdd()"],
+    [stepsOk, t('g3'), "go('activity')"],
+    [settings.water > 0, t('g4'), "go('profile')"],
+  ];
+  const done = steps.filter(s => s[0]).length;
+  if (done === steps.length) return '';
+  return `<div class="card guide"><div class="ghead"><h3>🚀 ${t('gTitle')}</h3><button class="x" onclick="settings.guideDone=true;store.set('settings',settings);render()">×</button></div>
+    <div class="track"><i style="width:${done / steps.length * 100}%;background:var(--grad)"></i></div>
+    ${steps.map(([ok, txt, fn]) => `<div class="gstep ${ok ? 'ok' : ''}" ${!ok && fn ? `onclick="${fn}"` : ''}><span>${ok ? '✓' : ''}</span>${txt}${!ok && fn ? '<em>›</em>' : ''}</div>`).join('')}
+  </div>`;
 }
 
 function renderHome() {
@@ -136,65 +204,115 @@ function renderHome() {
   MEALS.forEach(m => {
     const items = x.food.map((it, idx) => ({ it, idx })).filter(o => o.it.meal === m);
     const sum = items.reduce((a, o) => a + o.it.kcal, 0);
-    meals += `<div class="meal"><div class="mhead"><b>${t('meal_' + m)}</b><span>${sum ? fmt(sum) + ' ' + t('kcal') : ''}</span></div>`;
-    if (!items.length) meals += `<div class="empty" onclick="openAdd('${m}')">+ ${t('addFood')}</div>`;
+    meals += `<div class="meal m-${m}"><div class="mhead"><b><i class="mico">${MEAL_ICON[m]}</i>${t('meal_' + m)}</b><span>${sum ? fmt(sum) + ' ' + t('kcal') : ''}</span><button class="plus" onclick="openAdd('${m}')">+</button></div>`;
+    if (!items.length) meals += `<div class="empty" onclick="openAdd('${m}')">${t('emptyMeal')}</div>`;
     items.forEach(o => {
-      meals += `<div class="fitem"><div><div class="fn">${esc(FOODS[o.it.id] ? fname(FOODS[o.it.id]) : o.it.nm)}</div><div class="fs">${o.it.u && o.it.u !== 'g' ? esc(amountText(o.it.q, o.it.u)) + ' · ' : ''}${o.it.g} ${t('gr')} · ${t('pfc', Math.round(o.it.p), Math.round(o.it.f), Math.round(o.it.c))}</div></div>
-      <div class="fk">${fmt(o.it.kcal)}</div><button class="x" onclick="delFood(${o.idx})">×</button></div>`;
+      const f = FOODS[o.it.id];
+      meals += `<div class="fitem"><i class="av">${CAT_ICON[f ? f.cat : 'custom']}</i><div><div class="fn">${esc(f ? fname(f) : o.it.nm)}</div><div class="fs">${o.it.u && o.it.u !== 'g' ? esc(amountText(o.it.q, o.it.u)) + ' · ' : ''}${o.it.g} ${t('gr')} · ${t('pfc', Math.round(o.it.p), Math.round(o.it.f), Math.round(o.it.c))}</div></div>
+      <div class="fk">${fmt(o.it.kcal)}<small>${t('kcal')}</small></div><button class="x" onclick="delFood(${o.idx})">×</button></div>`;
     });
     meals += '</div>';
   });
   const stPct = c.steps / (settings.stepGoal || 10000);
+  const pctEaten = Math.round(c.eaten.kcal / c.allowance * 100);
   return `
   <div class="datebar"><button onclick="shiftDay(-1)">‹</button><b>${dateLabel(curDate)}</b><button onclick="shiftDay(1)" ${isToday ? 'disabled' : ''}>›</button></div>
-  <div class="card hero">
-    <div class="ringwrap">${ring(c.eaten.kcal / c.allowance, over ? '#FDA4AF' : '#fff')}
-      <div class="ringtxt"><b>${fmt(Math.abs(c.left))}</b><span>${over ? t('over') : t('left')}</span></div></div>
+  ${startCard()}
+  <div class="card hero ${over ? 'over' : ''}">
+    <div class="ringwrap">${ring(c.eaten.kcal / c.allowance, over ? '#FECDD3' : '#fff', 140, 13)}
+      <div class="ringtxt"><span>${over ? t('overTop') : t('leftTop')}</span>${num(Math.abs(c.left))}<span>${t('kcal')}</span></div></div>
     <div class="herolist">
-      <div><span>${t('goal')}</span><b>${fmt(c.n.target)}</b></div>
-      <div><span>${t('activity')}</span><b class="good">+${fmt(c.active)}</b></div>
-      <div><span>${t('eaten')}</span><b>−${fmt(c.eaten.kcal)}</b></div>
+      <div><span>🎯 ${t('goal')}</span><b>${fmt(c.n.target)}</b></div>
+      <div><span>🔥 ${t('activity')}</span><b>+${fmt(c.active)}</b></div>
+      <div><span>🍽️ ${t('eaten')}</span><b>−${fmt(c.eaten.kcal)}</b></div>
+      <p class="heroHint">${over ? t('heroOver') : t('heroLeft', pctEaten)}</p>
+    </div>
+  </div>
+  <div class="grid2">
+    <div class="card tile steps" onclick="go('activity')">
+      <div class="tring">${ring(stPct, '#fff', 64, 7)}<i>👟</i></div>
+      <div>${num(c.steps)}<span>${t('stepsOf', fmt(settings.stepGoal))}</span><span>${c.st.km.toFixed(1)} ${t('km')} · 🔥 ${fmt(c.st.kcal)}</span></div>
+    </div>
+    <div class="card tile water">
+      <div class="tring">${ring(water / c.n.water, '#fff', 64, 7)}<i>💧</i></div>
+      <div><b>${(water / 1000).toFixed(2).replace(/0$/, '')} ${t('l')}</b><span>${t('of')} ${(c.n.water / 1000).toFixed(1)} ${t('l')}</span>
+      <div class="wbtn"><button onclick="event.stopPropagation();addWater(-250)">−</button><button onclick="event.stopPropagation();addWater(250,this)">+ ${t('glass')}</button></div></div>
     </div>
   </div>
   <div class="card">
+    <h3>📊 ${t('dayBalance')}</h3>
     <div class="stats3">
-      <div><span>${t('eaten')}</span><b>${fmt(c.eaten.kcal)}</b><small>${t('kcal')}</small></div>
-      <div><span>${t('spent')}</span><b>${fmt(c.spent)}</b><small>${t('kcal')}</small></div>
-      <div><span>${t('balance')}</span><b class="${c.balance > 0 ? 'warn' : 'good'}">${c.balance > 0 ? '+' : ''}${fmt(c.balance)}</b><small>${t('kcal')}</small></div>
+      <div class="s-eat"><span>${t('eaten')}</span>${num(c.eaten.kcal)}<small>${t('kcal')}</small></div>
+      <div class="s-burn"><span>${t('spent')}</span>${num(c.spent)}<small>${t('kcal')}</small></div>
+      <div class="${c.balance > 0 ? 's-plus' : 's-minus'}"><span>${t('balance')}</span>${num(Math.abs(c.balance), c.balance > 0 ? '+' : '−')}<small>${t('kcal')}</small></div>
     </div>
     <p class="hint">${c.balance > 0 ? t('balPlus') : t('balMinus')}</p>
-    ${bar(t('protein'), c.eaten.p, c.n.prot, '#0EA5E9')}
-    ${bar(t('fat'), c.eaten.f, c.n.fat, '#F59E0B')}
-    ${bar(t('carb'), c.eaten.c, c.n.carb, '#8B5CF6')}
-  </div>
-  <div class="grid2">
-    <div class="card tile" onclick="go('activity')">
-      <div class="tring">${ring(stPct, '#F97316', 64, 7)}<i>👟</i></div>
-      <div><b>${fmt(c.steps)}</b><span>${t('stepsOf', fmt(settings.stepGoal))}</span><span>${c.st.km.toFixed(1)} ${t('km')} · ${fmt(c.st.kcal)} ${t('kcal')}</span></div>
-    </div>
-    <div class="card tile">
-      <div class="tring">${ring(water / c.n.water, '#0EA5E9', 64, 7)}<i>💧</i></div>
-      <div><b>${(water / 1000).toFixed(2).replace(/0$/, '')} ${t('l')}</b><span>${t('of')} ${(c.n.water / 1000).toFixed(1)} ${t('l')}</span>
-      <div class="wbtn"><button onclick="addWater(-250)">−</button><button onclick="addWater(250)">+250</button></div></div>
-    </div>
+    ${bar(t('protein'), c.eaten.p, c.n.prot, 'linear-gradient(90deg,#38BDF8,#0284C7)', '🥩')}
+    ${bar(t('fat'), c.eaten.f, c.n.fat, 'linear-gradient(90deg,#FCD34D,#F59E0B)', '🧈')}
+    ${bar(t('carb'), c.eaten.c, c.n.carb, 'linear-gradient(90deg,#C4B5FD,#7C3AED)', '🍞')}
   </div>
   <div class="card">${meals}</div>
-  <button class="btn primary big" onclick="openAdd()">+ ${t('addFood')}</button>
+  <button class="btn primary big pulse" onclick="openAdd()">＋ ${t('addFood')}</button>
   <p class="disc">${t('approx')}</p>`;
 }
 
 function shiftDay(n) {
   const d = addDays(curDate, n);
   if (d > todayStr()) return;
-  curDate = d; render();
+  curDate = d; render(true);
 }
-function addWater(ml) { const x = day(curDate); x.water = Math.max(0, x.water + ml); save(); render(); }
-function delFood(idx) { day(curDate).food.splice(idx, 1); save(); render(); }
-function openAdd(m) { if (m) selMeal = m; go('food'); setTimeout(() => { const e = $('#mealText'); if (e) e.focus(); }, 50); }
+function addWater(ml, el) {
+  const x = day(curDate); x.water = Math.max(0, x.water + ml); save();
+  if (ml > 0) drops(el);
+  render();
+}
+let undoItem = null;
+function delFood(idx) {
+  const x = day(curDate);
+  undoItem = { d: curDate, idx, it: x.food.splice(idx, 1)[0] };
+  save(); render();
+  toast(t('deleted'), t('undo'), () => {
+    if (!undoItem) return;
+    day(undoItem.d).food.splice(undoItem.idx, 0, undoItem.it); save(); undoItem = null; render();
+  });
+}
+function openAdd(m) { if (m) selMeal = m; go('food'); setTimeout(() => { const e = $('#mealText'); if (e) e.focus(); }, 80); }
+
+// Suv tomchilari animatsiyasi
+function drops(el) {
+  if (REDUCED || !el) return;
+  const r = el.getBoundingClientRect();
+  for (let i = 0; i < 6; i++) {
+    const d = document.createElement('i');
+    d.className = 'drop'; d.textContent = '💧';
+    d.style.left = (r.left + r.width / 2) + 'px'; d.style.top = r.top + 'px';
+    d.style.setProperty('--dx', (Math.random() * 80 - 40) + 'px');
+    d.style.animationDelay = i * 40 + 'ms';
+    document.body.appendChild(d);
+    setTimeout(() => d.remove(), 1000);
+  }
+}
+// Qo'shilganda tabrik animatsiyasi
+function celebrate(kcal) {
+  const o = $('#pop');
+  o.innerHTML = `<div class="popin"><div class="check">✓</div><b>${kcal != null ? '+' + fmt(kcal) + ' ' + t('kcal') : ''}</b><span>${t('added')}</span></div>`;
+  o.classList.remove('show'); void o.offsetWidth; o.classList.add('show');
+  if (!REDUCED) {
+    const em = ['🎉', '✨', '🥗', '💚', '⭐', '🍎'];
+    for (let i = 0; i < 14; i++) {
+      const p = document.createElement('i');
+      p.className = 'conf'; p.textContent = em[i % em.length];
+      const a = Math.random() * Math.PI * 2, dist = 90 + Math.random() * 90;
+      p.style.setProperty('--x', Math.cos(a) * dist + 'px'); p.style.setProperty('--y', Math.sin(a) * dist + 'px');
+      o.appendChild(p);
+    }
+  }
+  clearTimeout(celebrate.tm); celebrate.tm = setTimeout(() => o.classList.remove('show'), 1300);
+}
 
 // ---------- Ovqat qo'shish ----------
 function mealChips(cur, fn) {
-  return `<div class="chips">${MEALS.map(m => `<button class="chip ${m === cur ? 'on' : ''}" onclick="${fn}('${m}')">${t('meal_' + m)}</button>`).join('')}</div>`;
+  return `<div class="chips">${MEALS.map(m => `<button class="chip ${m === cur ? 'on' : ''}" onclick="${fn}('${m}')">${MEAL_ICON[m]} ${t('meal_' + m)}</button>`).join('')}</div>`;
 }
 function setMeal(m) { selMeal = m; document.querySelectorAll('#mealChips .chip').forEach((b, i) => b.classList.toggle('on', MEALS[i] === m)); }
 
@@ -202,18 +320,23 @@ function renderFood() {
   const ex = t('examples').split('|');
   return `
   <div class="card">
-    <h2>${t('whatAte')}</h2>
+    <h2>✍️ ${t('whatAte')}</h2>
+    <p class="hint">${t('foodHelp')}</p>
     ${curDate !== todayStr() ? `<p class="hint">📅 ${dateLabel(curDate)}</p>` : ''}
+    <div class="stepLbl"><i>1</i>${t('step1')}</div>
     <textarea id="mealText" rows="3" placeholder="${esc(t('placeholder'))}"></textarea>
-    <div class="chips ex">${ex.map(e => `<button class="chip light" onclick="useEx(this)">${esc(e)}</button>`).join('')}</div>
+    <div class="chips ex"><span class="exl">${t('tryEx')}</span>${ex.map(e => `<button class="chip light" onclick="useEx(this)">${esc(e)}</button>`).join('')}</div>
+    <div class="stepLbl"><i>2</i>${t('step2')}</div>
     <div id="mealChips">${mealChips(selMeal, 'setMeal')}</div>
+    <div class="stepLbl"><i>3</i>${t('step3')}</div>
     <button class="btn primary" onclick="doParse()">🔍 ${t('calc')}</button>
     <div id="parseOut"></div>
   </div>
   <div class="card">
-    <h2>${t('foodBase')}</h2>
-    <input id="foodSearch" class="inp" placeholder="${esc(t('search'))}" value="${esc(foodQuery)}" oninput="foodQuery=this.value;renderFoodList()">
-    <div class="chips scroll">${CATS.filter(c => c !== 'custom' || CUSTOM.length).map(c => `<button class="chip ${c === foodCat ? 'on' : ''}" onclick="foodCat='${c}';render()">${t('cat_' + c)}</button>`).join('')}</div>
+    <h2>📚 ${t('foodBase')} <span class="badge">${FOOD_LIST.length}</span></h2>
+    <p class="hint">${t('baseHelp')}</p>
+    <input id="foodSearch" class="inp search" placeholder="🔎 ${esc(t('search'))}" value="${esc(foodQuery)}" oninput="foodQuery=this.value;renderFoodList()">
+    <div class="chips scroll">${CATS.filter(c => c !== 'custom' || CUSTOM.length).map(c => `<button class="chip ${c === foodCat ? 'on' : ''}" onclick="foodCat='${c}';render()">${CAT_ICON[c]} ${t('cat_' + c)}</button>`).join('')}</div>
     <div id="foodList"></div>
     <button class="btn ghost" onclick="openCustom()">+ ${t('customFood')}</button>
   </div>`;
@@ -252,7 +375,7 @@ function renderParsed() {
       <div class="pctl"><input type="number" inputmode="decimal" min="0" step="${it.unit === 'g' ? 10 : 0.5}" value="${it.qty}" onchange="pEdit(${i},'qty',this.value)">
       <select onchange="pEdit(${i},'unit',this.value)">${unitOptions(it.food, it.unit)}</select></div></div>`;
   });
-  out.innerHTML = `<div class="res">${rows}
+  out.innerHTML = `<div class="res pop">${rows}
     ${parsed.unknown.length ? `<p class="hint">❓ ${t('unknownWords')}: <b>${esc(parsed.unknown.join(', '))}</b> — ${t('unknownHint')}</p>` : ''}
     <div class="ptotal"><span>${t('total')}</span><b>${fmt(sum)} ${t('kcal')}</b></div>
     <button class="btn primary" onclick="addParsed()">✓ ${t('addTo', t('meal_' + selMeal))}</button></div>`;
@@ -279,14 +402,15 @@ function pushFood(food, grams, meal, q, u) {
   if (food.water) x.water += Math.round(grams);
 }
 function addParsed() {
+  let sum = 0;
   parsed.items.forEach(it => {
     const g = gramsOf(it.food, it.qty, it.unit);
-    if (g > 0) pushFood(it.food, g, selMeal, it.qty, it.unit);
+    if (g > 0) { pushFood(it.food, g, selMeal, it.qty, it.unit); sum += nutr(it.food, g).kcal; }
   });
   save();
   parsed = null;
-  toast(t('added'));
   go('home');
+  celebrate(sum);
 }
 
 function renderFoodList() {
@@ -306,7 +430,7 @@ function renderFoodList() {
   }
   el.innerHTML = list.slice(0, 80).map(f => {
     const pg = f.portions[f.def];
-    return `<div class="litem" onclick="openFood('${f.id}')"><div><div class="fn">${esc(fname(f))}</div>
+    return `<div class="litem" onclick="openFood('${f.id}')"><i class="av c-${f.cat}">${CAT_ICON[f.cat]}</i><div><div class="fn">${esc(fname(f))}</div>
       <div class="fs">1 ${unitName(f.def)} ≈ ${pg} ${t('gr')} · ${fmt(f.kcal)} ${t('kcal')}/100 ${t('gr')}</div></div>
       <div class="fk">${fmt(f.kcal * pg / 100)}<small>${t('kcal')}</small></div></div>`;
   }).join('') || `<p class="hint">${t('nothing')}</p>`;
@@ -330,7 +454,7 @@ function openFood(id) {
   const f = FOODS[id];
   mFood = { food: f, qty: 1, unit: f.def, meal: selMeal };
   const per = f.portions[f.def];
-  openModal(`<h2>${esc(fname(f))}</h2>
+  openModal(`<div class="mhero"><i class="av big c-${f.cat}">${CAT_ICON[f.cat]}</i><h2>${esc(fname(f))}</h2></div>
     <p class="hint">100 ${t('gr')}: ${fmt(f.kcal)} ${t('kcal')} · ${t('pfc', f.p, f.f, f.c)}</p>
     <div class="pctl wide"><input id="mq" type="number" inputmode="decimal" min="0" step="0.5" value="1" oninput="mUpd()">
     <select id="mu" onchange="mUnit(this.value)">${unitOptions(f, f.def)}</select></div>
@@ -357,7 +481,7 @@ function mAdd() {
   const g = gramsOf(mFood.food, mFood.qty, mFood.unit);
   if (g <= 0) return;
   pushFood(mFood.food, g, mFood.meal, mFood.qty, mFood.unit);
-  save(); closeModal(); toast(t('added'));
+  save(); closeModal(); celebrate(nutr(mFood.food, g).kcal);
 }
 
 function openCustom() {
@@ -387,7 +511,7 @@ function delCustom(id) {
 function weekBars(vals, labels, color, goal, color2, vals2) {
   const W = 320, H = 130, bw = 26, gap = (W - 7 * bw) / 7;
   const max = Math.max(goal || 0, ...vals, ...(vals2 || [0]), 1);
-  let s = `<svg viewBox="0 0 ${W} ${H + 18}" class="chart">`;
+  let s = `<svg viewBox="0 0 ${W} ${H + 18}" class="chart"><defs><linearGradient id="gO" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FDBA74"/><stop offset="1" stop-color="#EA580C"/></linearGradient><linearGradient id="gT" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#34D399"/><stop offset="1" stop-color="#059669"/></linearGradient></defs>`;
   if (goal) { const y = H - goal / max * H; s += `<line x1="0" x2="${W}" y1="${y}" y2="${y}" stroke="var(--muted)" stroke-dasharray="4 4" stroke-width="1"/>`; }
   vals.forEach((v, i) => {
     const x = gap / 2 + i * (bw + gap);
@@ -422,7 +546,7 @@ function renderActivity() {
   return `
   <div class="datebar"><button onclick="shiftDay(-1)">‹</button><b>${dateLabel(curDate)}</b><button onclick="shiftDay(1)" ${isToday ? 'disabled' : ''}>›</button></div>
   <div class="card center">
-    <div class="ringwrap">${ring(c.steps / settings.stepGoal, '#F97316', 150, 13)}<div class="ringtxt"><b>${fmt(c.steps)}</b><span>${t('stepsOf', fmt(settings.stepGoal))}</span></div></div>
+    <div class="ringwrap">${ring(c.steps / settings.stepGoal, '#F97316', 160, 14)}<div class="ringtxt">${num(c.steps)}<span>${t('stepsOf', fmt(settings.stepGoal))}</span></div></div>
     <div class="stats3">
       <div><span>${t('distance')}</span><b>${c.st.km.toFixed(2)}</b><small>${t('km')}</small></div>
       <div><span>${t('burned')}</span><b>${fmt(c.st.kcal)}</b><small>${t('kcal')}</small></div>
@@ -431,18 +555,19 @@ function renderActivity() {
     ${sensorBox}
     <div class="inrow"><input id="manSteps" class="inp" type="number" inputmode="numeric" placeholder="${t('manualSteps')}"><button class="btn small" onclick="addSteps()">+</button></div>
   </div>
-  <div class="card"><h3>${t('week')} — ${t('steps')}</h3>${weekBars(last7.map(stepsFor), last7.map(dayShort), '#FB923C', settings.stepGoal)}</div>
+  <div class="card"><h3>📈 ${t('week')} — ${t('steps')}</h3>${weekBars(last7.map(stepsFor), last7.map(dayShort), 'url(#gO)', settings.stepGoal)}</div>
   <div class="card">
-    <h3>${t('workouts')}</h3>
+    <h3>🏋️ ${t('workouts')}</h3>
+    <p class="hint">${t('workHelp')}</p>
     <select id="wt" class="inp" onchange="wPrev()">${wopts}</select>
     <div class="inrow"><input id="wm" class="inp" type="number" inputmode="numeric" value="30" oninput="wPrev()"><span class="unit">${t('min')}</span></div>
     <p class="hint" id="wprev"></p>
     <button class="btn primary" onclick="addWork()">+ ${t('add')}</button>
     ${wl}
   </div>
-  <div class="card"><h3>${t('week')} — ${t('eatenVsSpent')}</h3>
-    ${weekBars(last7.map(d => totals(d).kcal), last7.map(dayShort), 'var(--pri2)', 0, '#F97316', last7.map(d => dayCalc(d).spent))}
-    <div class="legend"><i style="background:var(--pri2)"></i>${t('eaten')} <i style="background:#F97316"></i>${t('spent')}</div>
+  <div class="card"><h3>⚖️ ${t('week')} — ${t('eatenVsSpent')}</h3>
+    ${weekBars(last7.map(d => totals(d).kcal), last7.map(dayShort), 'url(#gT)', 0, 'url(#gO)', last7.map(d => { const x = days[d]; return (x && (x.food.length || x.workouts.length)) || stepsFor(d) ? dayCalc(d).spent : 0; }))}
+    <div class="legend"><i style="background:#10B981"></i>${t('eaten')} <i style="background:#F97316"></i>${t('spent')}</div>
   </div>`;
 }
 function wPrev() {
@@ -479,8 +604,8 @@ function renderPlan() {
   const goalTxt = { lose: t('paceLose'), slow: t('paceSlow'), keep: t('paceKeep'), gain: t('paceGain') }[n.goal];
   return `
   <div class="card">
-    <h2>${t('yourNorm')}</h2>
-    <div class="big">${fmt(n.target)} <small>${t('kcalDay')}</small></div>
+    <h2>🎯 ${t('yourNorm')}</h2>
+    <div class="big">${num(n.target)} <small>${t('kcalDay')}</small></div>
     <p class="hint">${goalTxt}</p>
     ${n.underweight ? `<p class="res warnbox">${t('underweight')}</p>` : ''}
     <div class="stats3">
@@ -495,19 +620,20 @@ function renderPlan() {
     </div>
   </div>
   <div class="card">
-    <h2>${t('menuTitle')}</h2>
+    <h2>🥗 ${t('menuTitle')}</h2>
     <p class="hint">${t('menuHint', fmt(plan.total))}</p>
     ${menu}
     <button class="btn primary" onclick="planSeed=(planSeed*7+13)%9973;store.set('planSeed',planSeed);render()">🔄 ${t('otherMenu')}</button>
   </div>
-  <div class="card"><h2>${t('tipsTitle')}</h2><ul class="tips">${t('tips').split('|').map(x => `<li>${x}</li>`).join('')}</ul></div>
-  <div class="card"><h3>${t('howTitle')}</h3><p class="hint">${t('howText')}</p></div>`;
+  <div class="card"><h2>💡 ${t('tipsTitle')}</h2><ul class="tips">${t('tips').split('|').map(x => `<li>${x}</li>`).join('')}</ul></div>
+  <div class="card"><h3>🧮 ${t('howTitle')}</h3><p class="hint">${t('howText')}</p></div>`;
 }
 function addPlanMeal(m) {
   const plan = makePlan(norms(profile).target, planSeed);
   const save0 = curDate; curDate = todayStr();
-  plan.meals[m].forEach(x => pushFood(FOODS[x.id], x.g, m));
-  curDate = save0; save(); toast(t('added'));
+  let sum = 0;
+  plan.meals[m].forEach(x => { pushFood(FOODS[x.id], x.g, m); sum += x.kcal; });
+  curDate = save0; save(); celebrate(sum);
 }
 
 // ---------- Profil ----------
@@ -519,22 +645,24 @@ function renderProfile() {
   if (profile) {
     const wl = weights.slice(-30);
     extra = `
-    <div class="card"><h3>${t('weightLog')}</h3>
+    <div class="card"><h3>⚖️ ${t('weightLog')}</h3>
       <div class="inrow"><input id="wkg" class="inp" type="number" inputmode="decimal" placeholder="${t('kg')}" value="${profile.weight}"><button class="btn small" onclick="addWeight()">+</button></div>
       ${wl.length > 1 ? weightChart(wl) : `<p class="hint">${t('weightHint')}</p>`}
       ${wl.slice(-5).reverse().map(w => `<div class="fitem small"><div class="fn">${dateLabel(w.d)}</div><div class="fk">${w.kg} ${t('kg')}</div></div>`).join('')}
     </div>
-    <div class="card"><h3>${t('waterRemind')}</h3>
+    <div class="card"><h3>💧 ${t('waterRemind')}</h3>
       <div class="chips">${[0, 1, 2, 3].map(h => `<button class="chip ${settings.water === h ? 'on' : ''}" onclick="setWaterRem(${h})">${h ? t('everyH', h) : t('off')}</button>`).join('')}</div>
     </div>
-    <div class="card"><h3>${t('about')}</h3><p class="hint">${t('aboutText')}</p>
+    <div class="card"><h3>❓ ${t('faqTitle')}</h3>${t('faq').split('|').map(q => { const [a, b] = q.split('=>'); return `<details class="faq"><summary>${a}</summary><p>${b}</p></details>`; }).join('')}</div>
+    <div class="card"><h3>ℹ️ ${t('about')}</h3><p class="hint">${t('aboutText')}</p>
       <button class="btn ghost danger" onclick="askReset()">${t('reset')}</button></div>`;
   }
   return `
   ${profile ? '' : `<div class="welcome"><div class="logo">🍽️</div><h1>Sog'lom Hayot</h1><p>${t('welcome')}</p></div>`}
-  <div class="card"><h3>${t('language')}</h3>${langs}</div>
+  <div class="card"><h3>🌐 ${t('language')}</h3>${langs}</div>
   <div class="card">
-    <h2>${t('aboutYou')}</h2>
+    <h2>👤 ${t('aboutYou')}</h2>
+    ${profile ? '' : `<p class="hint">${t('whyData')}</p>`}
     <label>${t('sex')}</label>${ch('sex', p.sex, ['m', 'f'])}
     <div class="row3">
       <div><label>${t('age')}</label><input id="pAge" class="inp" type="number" inputmode="numeric" value="${p.age}"></div>
@@ -602,19 +730,22 @@ function setLang(l) {
   if (AND) AND.setTexts(JSON.stringify({ stepsChannel: t('n_stepsCh'), stepsTitle: t('n_stepsTitle'), stepsText: t('n_stepsText'),
     waterChannel: t('n_waterCh'), waterTitle: t('n_waterTitle'), waterText: t('n_waterText') }));
   document.documentElement.lang = l;
-  render();
+  render(true);
 }
 
-function toast(msg) {
-  const e = $('#toast'); e.textContent = msg; e.classList.add('show');
-  clearTimeout(toast.tm); toast.tm = setTimeout(() => e.classList.remove('show'), 1800);
+function toast(msg, action, fn) {
+  const e = $('#toast');
+  e.innerHTML = esc(msg) + (action ? ` <button>${esc(action)}</button>` : '');
+  if (action) e.querySelector('button').onclick = () => { e.classList.remove('show'); fn(); };
+  e.classList.add('show');
+  clearTimeout(toast.tm); toast.tm = setTimeout(() => e.classList.remove('show'), action ? 4500 : 1800);
 }
 
 let lastToday = todayStr();
 window.onAppResume = function () {
   if (curDate === lastToday && lastToday !== todayStr()) curDate = todayStr();
   lastToday = todayStr();
-  if (!modalOpen && (tab === 'home' || tab === 'activity')) render();
+  if (!modalOpen && profile && (tab === 'home' || tab === 'activity')) render();
 };
 window.onStepsState = function () { render(); };
 
@@ -625,5 +756,6 @@ window.onStepsState = function () { render(); };
     lang = nl === 'ru' ? 'ru' : nl === 'en' ? 'en' : 'uz';
   }
   setLang(lang);
+  if (profile) store.set('intro', true);
   setInterval(() => { if (!modalOpen && profile && (tab === 'home' || tab === 'activity') && document.activeElement.tagName !== 'INPUT') render(); }, 15000);
 })();

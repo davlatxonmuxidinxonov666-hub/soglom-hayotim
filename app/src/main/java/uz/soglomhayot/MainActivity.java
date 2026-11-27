@@ -24,7 +24,7 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle b) {
         super.onCreate(b);
-        getWindow().setStatusBarColor(0xFF0F766E);
+        getWindow().setStatusBarColor(0xFF059669);
         getWindow().setNavigationBarColor(0xFFFFFFFF);
         if (Build.VERSION.SDK_INT >= 26) {
             android.view.View d = getWindow().getDecorView();

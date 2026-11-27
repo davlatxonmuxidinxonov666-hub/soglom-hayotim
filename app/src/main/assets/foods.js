@@ -8,8 +8,8 @@ shivit_osh|uz|190,6,8,23|Shivit oshi|Шивит оши (зелёный плов)
 mastava|uz|75,4,3,8|Mastava|Мастава|Mastava (rice soup)|mastava,мастава,маставу,mastava sho'rva|kosa:400|h
 moshkichiri|uz|130,6,4,18|Moshkichiri|Мошкичири|Moshkichiri (mung bean rice)|moshkichiri,moshkichir,mashkichiri,mashkichir,moshkichri,мошкичири,мошкичир,машкичири,машкичир|tarelka:350|h
 moshxorda|uz|65,3.5,2.5,7.5|Mosh xo'rda|Машхурда|Mosh xo'rda (mung bean soup)|moshxo'rda,mosh xo'rda,mashxurda,mashhurda,moshxurda,машхурда,мошхурда,мошхўрда|kosa:400|h
-shurva|uz|60,4,3.5,3.5|Sho'rva|Шурпа|Shurpa (meat soup)|sho'rva,shorva,shurva,shurpa,шурпа,шорва,шўрва,sorpa,go'sht sho'rva|kosa:450|h
-lagmon|uz|140,7,5.5,16|Lag'mon|Лагман|Lagman (noodle soup)|lag'mon,lagmon,lagman,лагман,лагмон|kosa:450|
+shurva|uz|60,4,3.5,3.5|Sho'rva|Шурпа|Shurpa (meat soup)|sho'rva,shorva,shurva,shurpa,шурпа,шорва,шўрва,sorpa,go'sht sho'rva,qaynatma,qaynatma sho'rva|kosa:450|h
+lagmon|uz|140,7,5.5,16|Lag'mon|Лагман|Lagman (noodle soup)|lag'mon,lagmon,lagman,лагман,лагмон,uyg'ur lag'mon|kosa:450|
 qovurma_lagmon|uz|200,8,9,22|Qovurma lag'mon|Жареный лагман|Fried lagman|qovurma lag'mon,qovurma lagman,жареный лагман,босо лагман,boso lagman,gyuro lagman|tarelka:350|
 manti|uz|210,10,11,18|Manti|Манты|Manti (dumplings)|manti,manty,манты,манти,мантов|dona:55,tarelka:300|
 chuchvara|uz|110,6,5,11|Chuchvara (sho'rvali)|Чучвара (с бульоном)|Chuchvara soup|chuchvara,чучвара,чучвару,chuchvara sho'rva|kosa:350|
@@ -19,7 +19,7 @@ somsa_qovoq|uz|210,4,9,28|Qovoqli somsa|Самса с тыквой|Pumpkin samsa
 somsa_kartoshka|uz|240,5,11,30|Kartoshkali somsa|Самса с картошкой|Potato samsa|kartoshkali somsa,самса с картошкой,картофельная самса|dona:120|
 kok_somsa|uz|220,5,10,27|Ko'k somsa|Самса с зеленью|Herb samsa|ko'k somsa,kok somsa,самса с зеленью,зеленая самса|dona:110|
 dimlama|uz|95,6,5,7|Dimlama|Димлама|Dimlama (meat & veg stew)|dimlama,димлама,dimlyama,димляма|tarelka:400|h
-qozon_kabob|uz|230,12,15,12|Qozon kabob|Казан-кабоб|Kazan kebab|qozon kabob,qozon kabobi,казан кабоб,казан кебаб,kazan kabob|tarelka:300|
+qozon_kabob|uz|230,12,15,12|Qozon kabob|Казан-кабоб|Kazan kebab|qozon kabob,qozon kabobi,qovurdoq,казан кабоб,казан кебаб,kazan kabob|tarelka:300|
 norin|uz|200,12,9,17|Norin|Нарын|Naryn|norin,naryn,нарын,норин,бешбармак,beshbarmoq|tarelka:300|
 halim|uz|120,8,5,11|Halim|Халим|Halim (wheat & meat porridge)|halim,xalim,халим|kosa:350|
 hasip|uz|290,11,25,4|Hasip|Хасип|Hasip (sausage)|hasip,xasip,хасип|bolak:100|
@@ -66,7 +66,7 @@ pirojnoe|sweet|400,5,22,46|Pirojnoe|Пирожное|Pastry|pirojnoe,пирож�
 mol_gosht|meat|250,26,16,0|Mol go'shti (qaynatilgan)|Говядина (варёная)|Beef (boiled)|mol go'shti,mol go'sht,говядина,говядины,beef,go'sht,gosht,мясо,meat|bolak:100|h
 qoy_gosht|meat|290,24,21,0|Qo'y go'shti|Баранина|Lamb|qo'y go'shti,qo'y go'sht,баранина,баранины,lamb,mutton|bolak:100|
 tovuq|meat|170,25,7,0|Tovuq (qaynatilgan)|Курица (варёная)|Chicken (boiled)|tovuq,tovuq go'shti,tovuq ko'ksi,курица,курицы,куриная грудка,грудка,chicken,chicken breast|bolak:150|h
-tovuq_qovurilgan|meat|240,24,15,2|Qovurilgan tovuq|Жареная курица|Fried chicken|qovurilgan tovuq,жареная курица,fried chicken,крылышки,окорочка|bolak:150|
+tovuq_qovurilgan|meat|240,24,15,2|Qovurilgan tovuq|Жареная курица|Fried chicken|qovurilgan tovuq,жареная курица,fried chicken|bolak:150|
 baliq|meat|140,20,6,0|Baliq (pishirilgan)|Рыба (запечённая)|Fish (baked)|baliq,рыба,рыбы,fish|bolak:150|h
 baliq_qovurilgan|meat|200,19,12,4|Qovurilgan baliq|Жареная рыба|Fried fish|qovurilgan baliq,жареная рыба,fried fish|bolak:150|
 tuxum|meat|155,13,11,1|Tuxum (qaynatilgan)|Яйцо (варёное)|Egg (boiled)|tuxum,qaynatilgan tuxum,яйцо,яйца,яиц,яичко,egg,eggs|dona:55|h
@@ -158,6 +158,164 @@ nagets|fast|290,15,18,17|Naggets|Наггетсы|Nuggets|naggets,nagets,наг�
 yog|other|900,0,100,0|O'simlik yog'i|Растительное масло|Vegetable oil|yog',o'simlik yog'i,paxta yog'i,растительное масло,подсолнечное масло,масло,oil,vegetable oil|oshqoshiq:15|
 mayonez|other|630,1,67,4|Mayonez|Майонез|Mayonnaise|mayonez,майонез,майонеза,mayonnaise|oshqoshiq:15|
 ketchup|other|100,1.5,0.2,23|Ketchup|Кетчуп|Ketchup|ketchup,кетчуп|oshqoshiq:15|
+
+buxoro_osh|uz|230,7,12,24|Buxoro oshi|Бухарский плов|Bukhara plov|buxoro oshi,бухарский плов,devzira oshi|tarelka:350|
+fargona_osh|uz|260,7,15,24|Farg'ona oshi|Ферганский плов|Fergana plov|farg'ona oshi,ферганский плов,qovurma osh|tarelka:350|
+tovuq_osh|uz|200,9,9,21|Tovuqli osh|Плов с курицей|Chicken plov|tovuqli osh,плов с курицей,tovuq palov|tarelka:350|
+shirguruch|uz|120,3,4,18|Shirguruch (sutli guruch)|Рисовая каша на молоке|Milk rice porridge|shirguruch,sutli guruch,рисовая каша,молочная рисовая каша|tarelka:250|
+qovurma_shurva|uz|90,5,6,4|Qovurma sho'rva|Жареная шурпа|Fried shurpa|qovurma sho'rva,жареная шурпа|kosa:450|
+tovuq_shurva|uz|45,4,2,3|Tovuq sho'rva|Куриный суп|Chicken soup|tovuq sho'rva,tovuq sho'rvasi,куриный суп,куриный бульон,chicken soup|kosa:450|h
+kartoshka_shurva|uz|50,2,2,6|Kartoshkali sho'rva|Картофельный суп|Potato soup|kartoshkali sho'rva,картофельный суп,potato soup|kosa:400|h
+xamir_shurva|uz|80,3.5,3,10|Xamir sho'rva (kesma)|Суп с лапшой (кесма)|Noodle soup|xamir sho'rva,kesma,кесма,лапша,суп с лапшой,ugra,угра,ugra osh|kosa:400|
+unash|uz|75,3,3,9|Unash|Унаш|Unash (noodle soup)|unash,унаш|kosa:400|
+shilpildoq|uz|85,4,3,11|Shilpildoq|Шилпилдок|Shilpildoq (dough soup)|shilpildoq,шилпилдок|kosa:400|
+moshova|uz|70,4,2.5,8|Moshova|Мошова|Moshova (mung bean soup)|moshova,мошова|kosa:400|h
+mampar|uz|130,6,5,15|Mampar|Мампар|Mampar (dough stew)|mampar,мампар|kosa:400|
+dolma|uz|170,9,11,9|Do'lma|Долма|Dolma|do'lma,dolma,долма|dona:50|
+karam_dolma|uz|120,7,7,8|Karam do'lma (golubsi)|Голубцы|Cabbage rolls|karam do'lma,голубцы,голубец,golubtsi|dona:120|
+qalampir_dolma|uz|110,6,6,8|Qalampir do'lma|Фаршированный перец|Stuffed peppers|qalampir do'lma,фаршированный перец,перец фаршированный|dona:150|
+tandir_kabob|uz|250,23,17,1|Tandir kabob|Тандыр кабоб|Tandoor kebab|tandir kabob,тандыр кабоб,тандыр кебаб|porsiya:200|
+kuskovoy|uz|260,20,19,2|Kuskovoy kabob|Кусковой кебаб|Meat chunk kebab|kuskovoy,кусковой,кусковой кебаб|six:100|
+baliq_shashlik|uz|160,20,8,0|Baliq shashlik|Шашлык из рыбы|Fish kebab|baliq shashlik,шашлык из рыбы,fish kebab|six:100|h
+qanot|meat|230,19,16,2|Tovuq qanotchalari|Куриные крылышки|Chicken wings|qanot,qanotcha,qanotchalar,tovuq qanoti,куриные крылья,крылышки,крылья,wings|dona:40|
+tovuq_son|meat|215,18,15,0|Tovuq soni|Куриная ножка (окорочок)|Chicken leg|tovuq soni,tovuq oyog'i,окорочок,окорочка,куриная ножка,chicken leg|dona:150|
+tovuq_gril|meat|210,22,13,0|Tovuq gril|Курица гриль|Grilled chicken|tovuq gril,курица гриль,grill chicken,гриль|bolak:200|
+yupqa|uz|250,9,12,27|Yupqa|Юпка|Yupqa (layered pie)|yupqa,юпка|bolak:150|
+qutob|uz|250,8,12,28|Qutob|Кутаб|Qutab|qutob,кутаб,кутабы|dona:80|
+bichak|uz|300,5,14,40|Bichak|Бичак|Bichak (pumpkin pastry)|bichak,бичак|dona:80|
+bogirsoq|non|400,7,20,48|Bo'g'irsoq|Баурсак|Baursak|bo'g'irsoq,bogirsoq,баурсак,баурсаки,baursak|dona:15|
+pishme|non|380,7,18,48|Pishme|Пишме|Pishme (fried pastry)|pishme,пишме|dona:30|
+samarqand_non|non|290,9,3,56|Samarqand noni|Самаркандская лепёшка|Samarkand bread|samarqand noni,самаркандская лепешка,samarqand non|bolak:70,dona:500|
+kulcha|non|330,8,9,54|Kulcha|Кулча|Kulcha (small bread)|kulcha,кулча|dona:100|
+varaqi_somsa|uz|360,10,23,29|Varaqi somsa|Слоёная самса|Flaky samsa|varaqi somsa,varak somsa,слоеная самса|dona:110|
+tovuq_somsa|uz|280,11,15,26|Tovuqli somsa|Самса с курицей|Chicken samsa|tovuqli somsa,самса с курицей|dona:120|
+manti_qovoq|uz|140,4,5,20|Qovoqli manti|Манты с тыквой|Pumpkin manti|qovoqli manti,манты с тыквой|dona:50|
+holvaytar|sweet|330,5,18,38|Holvaytar|Холвайтар|Holvaytar (flour halva)|holvaytar,xolvaytar,холвайтар|piyola:150|
+parvarda|sweet|380,0,0,95|Parvarda|Парварда|Parvarda (pulled candy)|parvarda,парварда|dona:10|
+chakki|dairy|70,6,2,4|Chakki|Чакка|Chakka (strained yogurt)|chakki,chakka,чакка|oshqoshiq:30|h
+qimiz|drink|50,2,2,5|Qimiz|Кумыс|Kumis|qimiz,кумыс,kumis|stakan:250|
+sutli_choy|drink|40,1.5,1.5,4.5|Sutli choy|Чай с молоком|Tea with milk|sutli choy,чай с молоком,ак чай|piyola:200|
+bedana|meat|168,12,13,0.5|Bedana tuxumi|Перепелиные яйца|Quail eggs|bedana tuxumi,bedana,перепелиные яйца,quail eggs|dona:12|h
+
+mosh|garnish|105,7,0.4,19|Mosh (qaynatilgan)|Маш (варёный)|Mung beans (boiled)|mosh,маш,mung|tarelka:200|h
+loviya|garnish|125,8,0.5,22|Loviya (qaynatilgan)|Фасоль (варёная)|Beans (boiled)|loviya,фасоль,beans|tarelka:200|h
+noxat|garnish|140,8,2.5,22|No'xat (qaynatilgan)|Нут (варёный)|Chickpeas (boiled)|no'xat,noxat,нут,горох,chickpeas|tarelka:200|h
+yasmiq|garnish|115,9,0.4,20|Yasmiq (qaynatilgan)|Чечевица (варёная)|Lentils (boiled)|yasmiq,чечевица,lentils|tarelka:200|h
+ovsyanka_suv|garnish|70,2.5,1.5,12|Suli bo'tqasi (suvda)|Овсянка на воде|Oatmeal (with water)|овсянка на воде,suvda suli,oatmeal with water|tarelka:250|h
+tariq|garnish|110,3.5,1,21|Tariq bo'tqasi|Пшённая каша|Millet porridge|tariq bo'tqa,tariq,пшенка,пшенная каша,millet|tarelka:250|h
+perlovka|garnish|110,3,0.5,23|Perlovka|Перловка|Pearl barley|perlovka,перловка,pearl barley|tarelka:200|h
+bulgur|garnish|85,3,0.2,19|Bulgur|Булгур|Bulgur|bulgur,булгур|tarelka:200|h
+kuskus|garnish|112,3.8,0.2,23|Kuskus|Кускус|Couscous|kuskus,кускус,couscous|tarelka:200|
+pechka_kartoshka|garnish|120,2.5,4,19|Pechda pishgan kartoshka|Запечённый картофель|Baked potatoes|pechda kartoshka,запеченный картофель,картошка по деревенски,po derevenski,baked potatoes|tarelka:200|
+granola|garnish|450,10,18,62|Granola / myusli|Гранола / мюсли|Granola / muesli|granola,мюсли,musli,muesli|porsiya:50|
+xlopya|garnish|370,7,1,84|Makkajo'xori xlopyalari|Кукурузные хлопья|Cornflakes|xlopya,хлопья,кукурузные хлопья,cornflakes|porsiya:40|
+vareniki|uz|200,5,5,33|Vareniki|Вареники|Vareniki (dumplings)|vareniki,вареники|tarelka:250,dona:30|
+sirniki|non|220,15,10,18|Sirniki|Сырники|Syrniki (cottage cheese pancakes)|sirniki,сырники,syrniki|dona:50|
+oladi|non|250,6,9,36|Oladi|Оладьи|Thick pancakes|oladi,оладьи,оладушки,fritters|dona:40|
+cheburek|non|300,9,17,28|Cheburek|Чебурек|Cheburek|cheburek,чебурек,чебуреки|dona:130|
+xachapuri|non|300,11,15,30|Xachapuri|Хачапури|Khachapuri|xachapuri,хачапури,khachapuri|bolak:150,dona:300|
+sosiska_testo|fast|300,9,17,28|Xamirdagi sosiska|Сосиска в тесте|Sausage roll|сосиска в тесте,xamirdagi sosiska,sausage roll|dona:100|
+pirojki_pech|non|260,8,8,40|Pishirilgan pirojki|Печёные пирожки|Baked pirozhki|печеные пирожки,pishirilgan pirojki,baked pirozhki|dona:70|
+pirog|non|300,6,13,40|Pirog|Пирог|Pie|pirog,пирог,пирога,pie|bolak:100|
+lavash_non|non|275,9,1,56|Yupqa lavash non|Тонкий лаваш|Thin lavash bread|lavash non,тонкий лаваш,армянский лаваш|dona:80|
+kraker|non|430,10,14,68|Kraker|Крекер|Crackers|kraker,крекер,крекеры,crackers|dona:8|
+suxarik|fast|400,10,12,63|Suxariklar|Сухарики|Croutons|suxarik,suxariklar,сухарики,сухари,croutons|paket:40|
+
+toshkent_salat|salad|200,10,15,6|Toshkent salati|Салат «Ташкент»|Tashkent salad|toshkent salati,салат ташкент,ташкентский салат,tashkent salad|tarelka:200|
+karam_salat|salad|50,1.5,3,5|Karam salati|Салат из капусты|Cabbage salad|karam salati,салат из капусты,капустный салат,coleslaw|tarelka:200|h
+morkovcha|salad|120,1.2,9,8|Koreyscha sabzi|Морковь по-корейски|Korean carrot salad|koreyscha sabzi,морковь по корейски,морковча,morkovcha|tarelka:150|
+lavlagi_salat|salad|110,1.5,8,8|Lavlagi salati|Свекольный салат|Beet salad|lavlagi salati,салат из свеклы,свекольный салат,beet salad|tarelka:150|
+bodring_salat|salad|60,1,4.5,3.5|Bodring salati (smetanali)|Салат из огурцов со сметаной|Cucumber salad|bodring salati,огуречный салат,салат из огурцов|tarelka:150|h
+mimoza|salad|220,7,19,4|Mimoza salati|Салат «Мимоза»|Mimosa salad|mimoza,мимоза|tarelka:200|
+shuba|salad|190,6,15,8|Shuba salati|Сельдь под шубой|Herring under fur coat|seld pod shuboy,селедка под шубой,шуба|tarelka:200|
+grek_salat|salad|100,3,8,4|Grek salati|Греческий салат|Greek salad|grek salati,греческий салат,greek salad|tarelka:200|h
+sezar|salad|180,9,13,7|Sezar salati|Салат «Цезарь»|Caesar salad|sezar,цезарь,caesar|tarelka:200|
+krab_salat|salad|200,6,16,9|Krab salati|Крабовый салат|Crab stick salad|krab salati,крабовый салат|tarelka:200|
+karam|salad|25,1.3,0.1,6|Karam|Капуста|Cabbage|karam,капуста,cabbage|tarelka:150|h
+dimlangan_karam|salad|75,2,4,8|Dimlangan karam|Тушёная капуста|Stewed cabbage|dimlangan karam,тушеная капуста,stewed cabbage|tarelka:200|h
+gulkaram|salad|25,2,0.3,5|Gulkaram|Цветная капуста|Cauliflower|gulkaram,цветная капуста,cauliflower|tarelka:150|h
+brokkoli|salad|34,2.8,0.4,7|Brokkoli|Брокколи|Broccoli|brokkoli,брокколи,broccoli|tarelka:150|h
+baqlajon|salad|120,1,10,7|Qovurilgan baqlajon|Жареные баклажаны|Fried eggplant|baqlajon,qovurilgan baqlajon,баклажан,баклажаны,eggplant|tarelka:150|
+qalampir|salad|27,1,0.3,6|Bulg'or qalampiri|Болгарский перец|Bell pepper|qalampir,bulg'or qalampiri,болгарский перец,перец,bell pepper|dona:150|h
+piyoz|salad|40,1.1,0.1,9|Piyoz|Лук|Onion|piyoz,лук,onion|dona:80|h
+lavlagi|salad|43,1.6,0.2,10|Lavlagi|Свёкла|Beetroot|lavlagi,свекла,beetroot,beet|dona:150|h
+turp|salad|20,1,0.1,4|Turp / rediska|Редька / редиска|Radish|turp,rediska,редька,редиска,radish|dona:100|h
+qovoq|salad|26,1,0.1,6.5|Qovoq|Тыква|Pumpkin|qovoq,тыква,pumpkin|bolak:150|h
+kabachok|salad|24,1.2,0.3,4.6|Kabachok|Кабачок|Zucchini|kabachok,кабачок,кабачки,zucchini|tarelka:150|h
+kabachok_ikra|salad|90,1.5,7,7|Kabachok ikrasi|Кабачковая икра|Squash spread|kabachok ikrasi,кабачковая икра|oshqoshiq:30|
+makkajoxori|salad|96,3.4,1.5,21|Makkajo'xori|Кукуруза|Corn|makkajo'xori,makkajoxori,кукуруза,corn|dona:150|h
+zamburug|salad|90,2.5,7,3|Qovurilgan zamburug'|Жареные грибы|Fried mushrooms|zamburug',qo'ziqorin,грибы,жареные грибы,mushrooms|tarelka:150|
+kokat|salad|20,2,0.3,3|Ko'katlar|Зелень|Greens & herbs|ko'kat,ko'katlar,rayhon,ukrop,зелень,укроп,петрушка,кинза,greens,herbs|hovuch:20|h
+zaytun|salad|145,1,15,4|Zaytun|Оливки / маслины|Olives|zaytun,оливки,маслины,olives|dona:4|
+tuzlangan_bodring|salad|15,0.8,0.1,2|Tuzlangan bodring|Солёные огурцы|Pickles|tuzlangan bodring,соленые огурцы,маринованные огурцы,pickles|dona:60|h
+
+behi|fruit|57,0.4,0.1,15|Behi|Айва|Quince|behi,айва,quince|dona:200|h
+ananas|fruit|50,0.5,0.1,13|Ananas|Ананас|Pineapple|ananas,ананас,pineapple|bolak:100|h
+mango|fruit|60,0.8,0.4,15|Mango|Манго|Mango|mango,манго|dona:200|h
+avokado|fruit|160,2,15,9|Avokado|Авокадо|Avocado|avokado,авокадо,avocado|dona:150|h
+greypfrut|fruit|42,0.8,0.1,11|Greypfrut|Грейпфрут|Grapefruit|greypfrut,грейпфрут,grapefruit|dona:250|h
+malina|fruit|52,1.2,0.7,12|Malina|Малина|Raspberries|malina,малина,raspberries|piyola:120|h
+smorodina|fruit|44,1,0.4,10|Smorodina|Смородина|Currants|smorodina,смородина,currants|piyola:120|h
+chernika|fruit|57,0.7,0.3,14|Chernika|Черника / голубика|Blueberries|chernika,черника,голубика,blueberry,blueberries|piyola:120|h
+tut|fruit|43,1.4,0.4,10|Tut|Шелковица (тут)|Mulberries|tut,тутовник,шелковица,mulberry,mulberries|piyola:150|h
+jiyda|nuts|340,3,1,80|Jiyda|Джида|Oleaster (dried)|jiyda,джида|hovuch:30|
+
+qiyma|meat|250,17,20,0|Qiyma (qovurilgan)|Фарш (жареный)|Minced meat|qiyma,фарш,minced meat|tarelka:150|
+gulyash|meat|150,14,9,3|Gulyash|Гуляш|Goulash|gulyash,гуляш,goulash|tarelka:250|
+befstroganov|meat|200,15,14,4|Befstroganov|Бефстроганов|Beef stroganoff|befstroganov,бефстроганов,stroganoff|tarelka:250|
+tefteli|meat|180,11,11,9|Tefteli / frikadelka|Тефтели / фрикадельки|Meatballs|tefteli,тефтели,фрикадельки,frikadelka,meatballs|dona:40|
+shnitsel|meat|270,17,17,12|Shnitsel / otbivnoy|Шницель / отбивная|Schnitzel / cutlet|shnitsel,шницель,отбивная,otbivnoy,schnitzel|dona:150|
+tushonka|meat|220,15,17,0|Tushonka|Тушёнка|Canned stewed meat|tushonka,тушенка|porsiya:100,banka:325|
+vetchina|meat|270,15,23,1|Vetchina|Ветчина|Ham|vetchina,ветчина,ham|bolak:20|
+mol_tili|meat|230,16,18,0|Mol tili|Язык говяжий|Beef tongue|mol tili,говяжий язык|bolak:100|
+ot_gosht|meat|175,20,10,0|Ot go'shti|Конина|Horse meat|ot go'shti,конина|bolak:100|
+kurka|meat|150,24,6,0|Kurka go'shti|Индейка|Turkey|kurka,индейка,turkey|bolak:150|h
+skumbriya|meat|190,18,13,0|Skumbriya|Скумбрия|Mackerel|skumbriya,скумбрия,mackerel|bolak:150|h
+seld|meat|200,17,15,0|Seld (tuzlangan)|Сельдь, селёдка|Herring|seld,сельдь,селедка,herring|bolak:50|
+tunets|meat|110,24,1,0|Tunets (konserva)|Тунец (консервы)|Canned tuna|tunets,тунец,tuna|porsiya:100|h
+krevetka|meat|95,20,1.5,0|Krevetka|Креветки|Shrimp|krevetka,креветки,shrimp|porsiya:100|h
+krab_tayoqcha|meat|90,6,1,15|Krab tayoqchalari|Крабовые палочки|Crab sticks|krab tayoqchalari,крабовые палочки,crab sticks|dona:20|
+
+brynza|dairy|260,17,21,0|Brynza|Брынза|Feta cheese|brynza,брынза,feta|bolak:30|
+mozzarella|dairy|280,22,21,2|Mozzarella|Моцарелла|Mozzarella|mozzarella,моцарелла|bolak:30|
+eritilgan_pishloq|dairy|260,16,20,3|Eritilgan pishloq|Плавленый сыр|Processed cheese|eritilgan pishloq,плавленый сыр|dona:30|
+syrok|sweet|400,8,25,35|Glazirlangan syrok|Глазированный сырок|Glazed curd snack|syrok,сырок,глазированный сырок|dona:45|
+slivki|dairy|120,3,10,4|Slivki|Сливки|Cream|slivki,сливки,cream|oshqoshiq:15|
+sgushenka|sweet|320,7,8,55|Quyultirilgan sut|Сгущёнка|Condensed milk|quyultirilgan sut,сгущенка,сгущенное молоко,condensed milk|choyqoshiq:12|
+ryajenka|dairy|67,3,4,4|Ryajenka|Ряженка|Baked fermented milk|ryajenka,ряженка|stakan:250|h
+kokteyl|drink|110,3,4,16|Sutli kokteyl|Молочный коктейль|Milkshake|sutli kokteyl,molochniy kokteyl,молочный коктейль,milkshake|stakan:300|
+kakao|drink|80,3.5,3,10|Kakao (sutda)|Какао|Cocoa|kakao,какао,cocoa,горячий шоколад,hot chocolate|stakan:250|
+
+medovik|sweet|430,5,20,58|Medovik|Медовик|Honey cake|medovik,медовик,honey cake|bolak:120|
+napoleon|sweet|410,6,23,45|Napoleon torti|Торт «Наполеон»|Napoleon cake|napoleon,наполеон|bolak:120|
+pahlava|sweet|430,6,25,47|Pahlava|Пахлава|Baklava|pahlava,paxlava,пахлава,baklava|bolak:50|
+ponchik|sweet|350,6,18,42|Ponchik|Пончик|Donut|ponchik,пончик,пончики,donut,doughnut|dona:60|
+keks|sweet|400,6,20,50|Keks / maffin|Кекс / маффин|Muffin|keks,кекс,маффин,muffin|dona:70|
+rulet|sweet|380,5,16,54|Rulet|Рулет|Swiss roll|rulet,рулет|bolak:50|
+zefir|sweet|330,1,0,80|Zefir|Зефир|Marshmallow|zefir,зефир,marshmallow|dona:35|
+marmelad|sweet|320,0,0,80|Marmelad|Мармелад|Jelly candy|marmelad,мармелад,jelly|dona:10|
+kozinaki|nuts|520,15,30,50|Kozinaki|Козинаки|Seed brittle|kozinaki,козинаки|bolak:30|
+popkorn|fast|400,9,15,60|Popkorn|Попкорн|Popcorn|popkorn,попкорн,popcorn|porsiya:50|
+
+mors|drink|40,0.1,0,10|Mors|Морс|Berry drink|mors,морс|stakan:250|
+smuzi|drink|60,1,0.5,13|Smuzi|Смузи|Smoothie|smuzi,смузи,smoothie|stakan:300|h
+protein|drink|110,20,2,4|Protein kokteyli|Протеиновый коктейль|Protein shake|protein,протеин,протеиновый коктейль,protein shake|stakan:300|
+muzli_choy|drink|30,0,0,7.5|Muzli choy (shirin)|Холодный чай|Iced tea|ice tea,холодный чай,lipton,iced tea|butilka:500|
+vino|drink|85,0,0,2.5|Vino|Вино|Wine|vino,вино,wine|stakan:150|
+shampan|drink|85,0,0,3|Shampan|Шампанское|Champagne|shampan,шампанское,champagne|stakan:150|
+aroq|drink|235,0,0,0|Aroq|Водка|Vodka|aroq,водка,vodka|porsiya:50|
+konyak|drink|240,0,0,0|Konyak|Коньяк|Brandy|konyak,коньяк,brandy,cognac|porsiya:50|
+
+sushi|fast|150,6,3,25|Sushi / roll|Суши / роллы|Sushi rolls|sushi,суши,roll,ролл,роллы,rolls|dona:30|
+sendvich|fast|250,11,10,28|Sendvich / buterbrod|Сэндвич / бутерброд|Sandwich|sendvich,сэндвич,бутерброд,buterbrod,sandwich|dona:150|
+donar_tarelka|fast|200,12,10,16|Donar (tarelkada)|Донер на тарелке|Doner plate|donar tarelka,донер на тарелке,doner plate|tarelka:400|
+
+soya_sous|other|50,6,0,6|Soya sousi|Соевый соус|Soy sauce|soya sousi,соевый соус,soy sauce|oshqoshiq:15|
+gorchitsa|other|140,7,9,6|Gorchitsa|Горчица|Mustard|gorchitsa,горчица,mustard|choyqoshiq:5|
+zaytun_yogi|other|900,0,100,0|Zaytun yog'i|Оливковое масло|Olive oil|zaytun yog'i,оливковое масло,olive oil|oshqoshiq:15|
+xumus|other|170,8,10,14|Xumus|Хумус|Hummus|xumus,хумус,hummus|oshqoshiq:30|h
+arahis_pasta|other|600,25,50,20|Yeryong'oq pastasi|Арахисовая паста|Peanut butter|yeryong'oq pastasi,арахисовая паста,peanut butter|oshqoshiq:20|
+shokolad_pasta|sweet|540,6,31,57|Shokoladli pasta|Шоколадная паста|Chocolate spread|nutella,нутелла,шоколадная паста,chocolate spread|oshqoshiq:20|
 `;
 
 // Ovqatlanish rejasi andozalari (2000 kkal atrofida). Grammlar maqsadga qarab o'zgartiriladi.
