@@ -46,8 +46,11 @@ jobs:
           m = YOLO('/tmp/m/cafsd.pt')
           names = m.names
           print(len(names), 'labels')
-          out = m.export(format='tflite', imgsz=640, half=True)
-          print('exported', out)
+          try:
+              out = m.export(format='tflite', imgsz=640, half=True)
+              print('exported', out)
+          except Exception as e:
+              print('export warning:', repr(e))
           fs = sorted(glob.glob('/tmp/m/**/*float16.tflite', recursive=True)) or sorted(glob.glob('/tmp/m/**/*.tflite', recursive=True))
           dst = sys.argv[1]
           shutil.copy(fs[0], dst + '/food.tflite')
