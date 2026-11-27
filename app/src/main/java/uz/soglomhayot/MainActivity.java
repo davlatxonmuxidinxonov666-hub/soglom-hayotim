@@ -15,11 +15,27 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
+import android.media.ExifInterface;
+import android.provider.MediaStore;
+import android.util.Base64;
+
+import androidx.core.content.FileProvider;
+
+import org.json.JSONObject;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends Activity {
     private WebView web;
+    private Uri photoUri;
+    private static final int REQ_CAMERA = 31, REQ_GALLERY = 32;
 
     @Override
     protected void onCreate(Bundle b) {
@@ -108,6 +124,83 @@ public class MainActivity extends Activity {
         if (code == 22 && web != null) web.evaluateJavascript("window.onStepsState&&onStepsState()", null);
     }
 
+    // ---------- Rasm orqali taomni aniqlash ----------
+    private void startPhoto(boolean camera) {
+        try {
+            if (camera) {
+                File dir = new File(getCacheDir(), "photos");
+                dir.mkdirs();
+                File f = new File(dir, "shot.jpg");
+                photoUri = FileProvider.getUriForFile(this, getPackageName() + ".files", f);
+                Intent i = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                i.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
+                i.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                startActivityForResult(i, REQ_CAMERA);
+            } else {
+                Intent i = new Intent(Intent.ACTION_GET_CONTENT);
+                i.setType("image/*");
+                startActivityForResult(Intent.createChooser(i, null), REQ_GALLERY);
+            }
+        } catch (Exception e) {
+            sendAi(null, null, "nocamera");
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int req, int res, Intent data) {
+        super.onActivityResult(req, res, data);
+        if (req != REQ_CAMERA && req != REQ_GALLERY) return;
+        if (res != RESULT_OK) { sendAi(null, null, "cancel"); return; }
+        final Uri uri = req == REQ_CAMERA ? photoUri : (data != null ? data.getData() : null);
+        if (uri == null) { sendAi(null, null, "error"); return; }
+        sendAi(null, null, "busy");
+        new Thread(() -> {
+            try {
+                Bitmap bm = loadBitmap(uri, 1024);
+                String result = AiDetector.get(this).detect(bm);
+                Bitmap th = Bitmap.createScaledBitmap(bm, 320, Math.max(1, 320 * bm.getHeight() / bm.getWidth()), true);
+                ByteArrayOutputStream bo = new ByteArrayOutputStream();
+                th.compress(Bitmap.CompressFormat.JPEG, 80, bo);
+                String thumb = "data:image/jpeg;base64," + Base64.encodeToString(bo.toByteArray(), Base64.NO_WRAP);
+                sendAi(result, thumb, "ok");
+            } catch (Throwable e) {
+                sendAi(null, null, "error");
+            }
+        }).start();
+    }
+
+    private Bitmap loadBitmap(Uri uri, int max) throws Exception {
+        BitmapFactory.Options o = new BitmapFactory.Options();
+        o.inJustDecodeBounds = true;
+        try (InputStream in = getContentResolver().openInputStream(uri)) { BitmapFactory.decodeStream(in, null, o); }
+        int sample = 1;
+        while (Math.max(o.outWidth, o.outHeight) / (sample * 2) >= max) sample *= 2;
+        BitmapFactory.Options o2 = new BitmapFactory.Options();
+        o2.inSampleSize = sample;
+        Bitmap bm;
+        try (InputStream in = getContentResolver().openInputStream(uri)) { bm = BitmapFactory.decodeStream(in, null, o2); }
+        if (bm == null) throw new Exception("decode");
+        int rot = 0;
+        try (InputStream in = getContentResolver().openInputStream(uri)) {
+            int or = new ExifInterface(in).getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+            if (or == ExifInterface.ORIENTATION_ROTATE_90) rot = 90;
+            else if (or == ExifInterface.ORIENTATION_ROTATE_180) rot = 180;
+            else if (or == ExifInterface.ORIENTATION_ROTATE_270) rot = 270;
+        } catch (Exception ignored) {}
+        if (rot != 0) {
+            Matrix m = new Matrix();
+            m.postRotate(rot);
+            bm = Bitmap.createBitmap(bm, 0, 0, bm.getWidth(), bm.getHeight(), m, true);
+        }
+        return bm;
+    }
+
+    private void sendAi(String json, String thumb, String state) {
+        final String js = "window.onAiResult&&onAiResult(" + JSONObject.quote(state) + "," + (json == null ? "null" : json) + ","
+                + (thumb == null ? "null" : JSONObject.quote(thumb)) + ")";
+        runOnUiThread(() -> { if (web != null) web.evaluateJavascript(js, null); });
+    }
+
     private class Bridge {
         private final Context app;
 
@@ -143,5 +236,14 @@ public class MainActivity extends Activity {
 
         @JavascriptInterface
         public void setTexts(String json) { Texts.save(app, json); }
+
+        @JavascriptInterface
+        public boolean aiAvailable() { return AiDetector.available(app); }
+
+        @JavascriptInterface
+        public void takePhoto() { runOnUiThread(() -> startPhoto(true)); }
+
+        @JavascriptInterface
+        public void pickPhoto() { runOnUiThread(() -> startPhoto(false)); }
     }
 }
