@@ -37,26 +37,30 @@ jobs:
 
       - name: ISSAI modelini telefon formatiga o'tkazish (TFLite)
         if: steps.mcache.outputs.cache-hit != 'true'
+        continue-on-error: true
         run: |
           mkdir -p /tmp/m app/src/main/assets/ai
-          cd /tmp/m
-          curl -fL --retry 3 -o cafsd.pt https://issai.nu.edu.kz/wp-content/themes/issai-new/data/models/CAFSD/yolov8n.pt
-          pip install -q "ultralytics>=8.3,<8.5"
-          python - <<'PY'
+          cat > /tmp/m/conv.py <<'PY'
+          import glob, shutil, sys
           from ultralytics import YOLO
-          import json, glob, shutil
-          m = YOLO('cafsd.pt')
+          m = YOLO('/tmp/m/cafsd.pt')
           names = m.names
+          print(len(names), 'labels')
           out = m.export(format='tflite', imgsz=640, half=True)
           print('exported', out)
-          f = sorted(glob.glob('**/*float16.tflite', recursive=True) or glob.glob('**/*.tflite', recursive=True))[0]
-          dst = '${{ github.workspace }}/app/src/main/assets/ai/'
-          shutil.copy(f, dst + 'food.tflite')
-          with open(dst + 'labels.txt', 'w') as fh:
+          fs = sorted(glob.glob('/tmp/m/**/*float16.tflite', recursive=True)) or sorted(glob.glob('/tmp/m/**/*.tflite', recursive=True))
+          dst = sys.argv[1]
+          shutil.copy(fs[0], dst + '/food.tflite')
+          with open(dst + '/labels.txt', 'w') as fh:
               fh.write('\n'.join(names[i] for i in range(len(names))))
-          print(len(names), 'labels')
           PY
-          ls -la ${{ github.workspace }}/app/src/main/assets/ai
+          fail() { echo "::error title=$1::$(tail -c 3000 /tmp/m/log.txt | tr '\n' ' ')"; rm -rf "${{ github.workspace }}/app/src/main/assets/ai"; exit 1; }
+          curl -fL --retry 3 -o /tmp/m/cafsd.pt https://issai.nu.edu.kz/wp-content/themes/issai-new/data/models/CAFSD/yolov8n.pt > /tmp/m/log.txt 2>&1 || fail "yuklab olish"
+          ls -la /tmp/m/cafsd.pt
+          pip install "ultralytics>=8.3,<8.5" > /tmp/m/log.txt 2>&1 || fail "pip"
+          cd /tmp/m && python conv.py "${{ github.workspace }}/app/src/main/assets/ai" > /tmp/m/log.txt 2>&1 || fail "eksport"
+          tail -5 /tmp/m/log.txt
+          ls -la "${{ github.workspace }}/app/src/main/assets/ai"
 
       - name: APK yig'ish
         run: gradle assembleDebug --no-daemon --stacktrace

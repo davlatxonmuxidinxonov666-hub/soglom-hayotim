@@ -168,6 +168,38 @@ label{display:block;font-size:13.5px;color:var(--muted);margin:12px 0 5px;font-w
 .mres span{color:var(--muted);font-size:13px}
 .mhero{display:flex;align-items:center;gap:12px;margin-bottom:6px}
 .mhero h2{margin:0}
+/* Meal advice */
+.mhead .mt{display:flex;flex-direction:column;line-height:1.15;color:var(--txt);font-size:16px}
+.mt small{font-size:12px;color:var(--muted);font-weight:500}
+.track.thin{height:5px;margin:4px 0 6px 42px}
+.tip{width:30px;height:30px;border-radius:10px;border:0;background:#FEF9C3;font-size:15px}
+.m-breakfasti{background:#FFEDD5}.m-lunchi{background:#FEF9C3}.m-snacki{background:#DCFCE7}.m-dinneri{background:#E0E7FF}
+.advice{background:linear-gradient(135deg,#FEFCE8,#ECFDF5);border:2px solid #FDE68A;border-radius:16px;padding:12px 14px;font-size:14.5px;margin:10px 0 14px}
+.advice b{color:#047857}
+.opt{border:2px solid var(--line);border-radius:16px;padding:10px 12px;margin-bottom:10px}
+.optH{display:flex;justify-content:space-between;margin-bottom:4px}
+.optH span{color:var(--pri);font-weight:800}
+.opt .btn{margin-top:6px;width:100%}
+.pmrow{display:flex;align-items:center;gap:10px;padding:10px 4px;border-bottom:1px solid var(--line)}
+.pmrow:last-child{border:0}
+.pmrow span{flex:1;font-weight:700;display:flex;flex-direction:column}
+.pmrow span small{font-weight:400;color:var(--muted);font-size:12px}
+.pmrow b{color:var(--pri);font-size:17px}
+.pmrow em{font-style:normal;color:var(--pri);font-size:20px}
+/* AI */
+.aibox{display:flex;gap:8px}
+.aibox .cam{flex:1;margin-top:4px;font-size:17px;padding:16px}
+.aibox .gal{width:64px;margin-top:4px;font-size:22px;padding:0}
+.aiconf{font-style:normal;font-size:11px;background:#EDE9FE;color:#6D28D9;padding:1px 6px;border-radius:8px;font-weight:700}
+.aihead{display:flex;gap:12px;align-items:center;margin:6px 0}
+.aihead p{margin:0;font-size:13.5px;color:var(--muted)}
+.thumb{width:84px;height:84px;object-fit:cover;border-radius:14px;flex-shrink:0;box-shadow:0 4px 10px rgba(0,0,0,.12)}
+.warnbox .thumb{float:left;margin:0 12px 6px 0}
+.aiwait{text-align:center;padding:20px 0}
+.scan{width:120px;height:120px;margin:0 auto 14px;border-radius:30px;background:var(--grad);position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.scan i{font-style:normal;font-size:54px}
+.scan:after{content:"";position:absolute;left:0;right:0;height:30px;background:linear-gradient(180deg,transparent,rgba(255,255,255,.7),transparent);animation:scan 1.3s ease-in-out infinite}
+@keyframes scan{0%{top:-30px}100%{top:120px}}
 /* Intro */
 .intro{text-align:center;padding:40px 14px 20px;min-height:88vh;display:flex;flex-direction:column;justify-content:center}
 .introIcon{font-size:76px;width:140px;height:140px;margin:0 auto 18px;border-radius:44px;background:var(--grad);display:flex;align-items:center;justify-content:center;box-shadow:0 16px 36px rgba(13,148,136,.4);animation:float 3s ease-in-out infinite}

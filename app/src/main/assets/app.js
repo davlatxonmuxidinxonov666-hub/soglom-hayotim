@@ -204,7 +204,11 @@ function renderHome() {
   MEALS.forEach(m => {
     const items = x.food.map((it, idx) => ({ it, idx })).filter(o => o.it.meal === m);
     const sum = items.reduce((a, o) => a + o.it.kcal, 0);
-    meals += `<div class="meal m-${m}"><div class="mhead"><b><i class="mico">${MEAL_ICON[m]}</i>${t('meal_' + m)}</b><span>${sum ? fmt(sum) + ' ' + t('kcal') : ''}</span><button class="plus" onclick="openAdd('${m}')">+</button></div>`;
+    const goalM = Math.round(c.n.target * MEAL_SHARE[m] / 10) * 10;
+    const pm = Math.min(100, sum / goalM * 100);
+    meals += `<div class="meal m-${m}"><div class="mhead"><b><i class="mico">${MEAL_ICON[m]}</i><span class="mt">${t('meal_' + m)}<small>${fmt(sum)} / ${fmt(goalM)} ${t('kcal')}</small></span></b>
+      <button class="tip" onclick="openMealAdvice('${m}')">💡</button><button class="plus" onclick="openAdd('${m}')">+</button></div>
+      <div class="track thin"><i style="width:${pm}%;background:${sum > goalM * 1.15 ? 'linear-gradient(90deg,#FB7185,#E11D48)' : 'var(--grad)'}"></i></div>`;
     if (!items.length) meals += `<div class="empty" onclick="openAdd('${m}')">${t('emptyMeal')}</div>`;
     items.forEach(o => {
       const f = FOODS[o.it.id];
@@ -310,6 +314,93 @@ function celebrate(kcal) {
   clearTimeout(celebrate.tm); celebrate.tm = setTimeout(() => o.classList.remove('show'), 1300);
 }
 
+
+// ---------- Ovqatlanish bo'yicha tavsiyalar ----------
+const MEAL_SHARE = { breakfast: 0.25, lunch: 0.35, snack: 0.10, dinner: 0.30 };
+function mealOptions(m, target, seed) {
+  const opts = PLAN_TEMPLATES[m];
+  const order = opts.map((_, i) => i).sort((a, b) => ((a * 7 + seed) % 11) - ((b * 7 + seed) % 11));
+  return order.slice(0, 3).map(i => {
+    const raw = opts[i].map(([id, g]) => ({ id, g }));
+    const base = raw.reduce((a, x) => a + FOODS[x.id].kcal * x.g / 100, 0);
+    const k = Math.min(1.35, Math.max(0.5, target / base));
+    let sum = 0;
+    const items = raw.map(x => {
+      const f = FOODS[x.id];
+      let g = f.cat === 'drink' && f.kcal < 5 ? x.g : Math.max(10, Math.round(x.g * k / 10) * 10);
+      if (f.def === 'dona' && f.portions.dona >= 40) g = Math.max(1, Math.round(g / f.portions.dona * 2) / 2) * f.portions.dona;
+      const n = nutr(f, g); sum += n.kcal;
+      return { id: x.id, g, kcal: n.kcal };
+    });
+    return { items, sum };
+  });
+}
+let adviceOpts = null;
+function openMealAdvice(m) {
+  const n = norms(profile);
+  const goalM = Math.round(n.target * MEAL_SHARE[m] / 10) * 10;
+  const eaten = day(curDate).food.filter(f => f.meal === m).reduce((a, f) => a + f.kcal, 0);
+  const left = goalM - eaten;
+  const tgt = left > 120 ? left : goalM;
+  const seed = parseInt(curDate.replace(/-/g, '')) % 97;
+  adviceOpts = { m, list: mealOptions(m, tgt, seed) };
+  const share = MEAL_SHARE[m];
+  openModal(`<div class="mhero"><i class="av big m-${m}i">${MEAL_ICON[m]}</i><div><h2>${t('meal_' + m)}</h2><p class="hint" style="margin:0">${t('advNorm', fmt(goalM), Math.round(share * 100))}</p></div></div>
+    <div class="stats3">
+      <div class="s-eat"><span>${t('eaten')}</span><b>${fmt(eaten)}</b><small>${t('kcal')}</small></div>
+      <div class="${left >= 0 ? 's-minus' : 's-plus'}"><span>${left >= 0 ? t('canMore') : t('overBy')}</span><b>${fmt(Math.abs(left))}</b><small>${t('kcal')}</small></div>
+      <div><span>${t('protein')}</span><b>${Math.round(n.prot * share)}</b><small>${t('gr')}</small></div>
+    </div>
+    <div class="advice">${t('adv_' + m)}</div>
+    <h3>${left > 120 ? t('advPick', fmt(tgt)) : t('advPickFull', fmt(tgt))}</h3>
+    ${adviceOpts.list.map((o, i) => `<div class="opt"><div class="optH"><b>${t('variant')} ${i + 1}</b><span>≈ ${fmt(o.sum)} ${t('kcal')}</span></div>
+      ${o.items.map(x => `<div class="fitem small"><i class="av c-${FOODS[x.id].cat}">${CAT_ICON[FOODS[x.id].cat]}</i><div class="fn">${esc(fname(FOODS[x.id]))}</div><div class="fs">${x.g} ${t('gr')}</div><div class="fk">${fmt(x.kcal)}</div></div>`).join('')}
+      <button class="btn ghost small" onclick="addAdvice(${i})">+ ${t('iAteThis')}</button></div>`).join('')}
+    <button class="btn ghost" onclick="closeModal()">${t('close')}</button>`);
+}
+function addAdvice(i) {
+  const o = adviceOpts.list[i];
+  o.items.forEach(x => pushFood(FOODS[x.id], x.g, adviceOpts.m));
+  save(); closeModal(); render(); celebrate(o.sum);
+}
+
+// ---------- Rasm orqali aniqlash (telefon ichidagi ISSAI modeli) ----------
+const AI_MAP = {};
+function aiOn() { try { return !!(AND && AND.aiAvailable()); } catch (e) { return false; } }
+function aiFood(label) {
+  if (AI_MAP[label] !== undefined) return AI_MAP[label] ? FOODS[AI_MAP[label]] : null;
+  const toks = tokenize(label.replace(/[_-]/g, ' '));
+  for (let i = 0; i < toks.length; i++) {
+    const m = matchFood(toks, i, 1);
+    if (m) return m.food;
+  }
+  return null;
+}
+function aiPhoto(camera) { if (camera) AND.takePhoto(); else AND.pickPhoto(); }
+window.onAiResult = function (state, list, thumb) {
+  if (state === 'busy') {
+    openModal(`<div class="aiwait"><div class="scan"><i>🍽️</i></div><h2>${t('aiLooking')}</h2><p class="hint">${t('aiLookingHint')}</p></div>`);
+    return;
+  }
+  if (state === 'cancel') { if (modalOpen) closeModal(); return; }
+  if (state !== 'ok') { closeModal(); toast(t('aiError')); return; }
+  closeModal();
+  const items = [], unknown = [];
+  (list || []).forEach(d => {
+    const f = aiFood(d.label);
+    if (!f) { unknown.push(d.label.replace(/_/g, ' ')); return; }
+    const ex = items.find(x => x.food === f);
+    if (ex) { if (f.def === 'dona') ex.qty += d.count; return; }
+    const r = resolve({ food: f, q: f.def === 'dona' ? d.count : null, u: null, mul: 1 });
+    r.ai = Math.round(d.score * 100);
+    items.push(r);
+  });
+  if (tab !== 'food') go('food');
+  parsed = { items, unknown, thumb };
+  renderParsed();
+  setTimeout(() => { const e = $('#parseOut'); if (e) e.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 100);
+};
+
 // ---------- Ovqat qo'shish ----------
 function mealChips(cur, fn) {
   return `<div class="chips">${MEALS.map(m => `<button class="chip ${m === cur ? 'on' : ''}" onclick="${fn}('${m}')">${MEAL_ICON[m]} ${t('meal_' + m)}</button>`).join('')}</div>`;
@@ -323,6 +414,8 @@ function renderFood() {
     <h2>✍️ ${t('whatAte')}</h2>
     <p class="hint">${t('foodHelp')}</p>
     ${curDate !== todayStr() ? `<p class="hint">📅 ${dateLabel(curDate)}</p>` : ''}
+    ${aiOn() ? `<div class="aibox"><button class="btn primary cam" onclick="aiPhoto(true)">📷 ${t('aiCamera')}</button><button class="btn ghost gal" onclick="aiPhoto(false)">🖼️</button></div>
+    <p class="hint center">${t('aiOr')}</p>` : ''}
     <div class="stepLbl"><i>1</i>${t('step1')}</div>
     <textarea id="mealText" rows="3" placeholder="${esc(t('placeholder'))}"></textarea>
     <div class="chips ex"><span class="exl">${t('tryEx')}</span>${ex.map(e => `<button class="chip light" onclick="useEx(this)">${esc(e)}</button>`).join('')}</div>
@@ -360,6 +453,7 @@ function renderParsed() {
   const out = $('#parseOut');
   if (!out || !parsed) return;
   if (!parsed.items.length) {
+    if (parsed.thumb) { out.innerHTML = `<div class="res warnbox"><img class="thumb" src="${parsed.thumb}">${t('aiNothing')}${parsed.unknown.length ? '<br>' + t('aiSaw') + ': <b>' + esc(parsed.unknown.join(', ')) + '</b>' : ''}</div>`; return; }
     out.innerHTML = `<div class="res warnbox">${t('notFound')}${parsed.unknown.length ? ': <b>' + esc(parsed.unknown.join(', ')) + '</b>' : ''}<br>${t('notFoundHint')}</div>`;
     return;
   }
@@ -369,13 +463,13 @@ function renderParsed() {
     const n = nutr(it.food, g);
     sum += n.kcal;
     rows += `<div class="prow">
-      <div class="pname">${esc(fname(it.food))}<small>${n.g} ${t('gr')} · ${t('pfc', Math.round(n.p), Math.round(n.f), Math.round(n.c))}</small></div>
+      <div class="pname">${esc(fname(it.food))}${it.ai ? ` <em class="aiconf">🤖 ${it.ai}%</em>` : ''}<small>${n.g} ${t('gr')} · ${t('pfc', Math.round(n.p), Math.round(n.f), Math.round(n.c))}</small></div>
       <div class="pk">${fmt(n.kcal)}<small>${t('kcal')}</small></div>
       <button class="x" onclick="pDel(${i})">×</button>
       <div class="pctl"><input type="number" inputmode="decimal" min="0" step="${it.unit === 'g' ? 10 : 0.5}" value="${it.qty}" onchange="pEdit(${i},'qty',this.value)">
       <select onchange="pEdit(${i},'unit',this.value)">${unitOptions(it.food, it.unit)}</select></div></div>`;
   });
-  out.innerHTML = `<div class="res pop">${rows}
+  out.innerHTML = `<div class="res pop">${parsed.thumb ? `<div class="aihead"><img class="thumb" src="${parsed.thumb}"><p>${t('aiCheck')}</p></div>` : ''}${rows}
     ${parsed.unknown.length ? `<p class="hint">❓ ${t('unknownWords')}: <b>${esc(parsed.unknown.join(', '))}</b> — ${t('unknownHint')}</p>` : ''}
     <div class="ptotal"><span>${t('total')}</span><b>${fmt(sum)} ${t('kcal')}</b></div>
     <button class="btn primary" onclick="addParsed()">✓ ${t('addTo', t('meal_' + selMeal))}</button></div>`;
@@ -620,6 +714,11 @@ function renderPlan() {
     </div>
   </div>
   <div class="card">
+    <h2>🍽️ ${t('perMeal')}</h2>
+    <p class="hint">${t('perMealHint')}</p>
+    ${MEALS.map(m => `<div class="pmrow" onclick="openMealAdvice('${m}')"><i class="mico m-${m}i">${MEAL_ICON[m]}</i><span>${t('meal_' + m)}<small>${t('time_' + m)}</small></span><b>${fmt(Math.round(n.target * MEAL_SHARE[m] / 10) * 10)} <small>${t('kcal')}</small></b><em>›</em></div>`).join('')}
+  </div>
+  <div class="card">
     <h2>🥗 ${t('menuTitle')}</h2>
     <p class="hint">${t('menuHint', fmt(plan.total))}</p>
     ${menu}
@@ -654,7 +753,7 @@ function renderProfile() {
       <div class="chips">${[0, 1, 2, 3].map(h => `<button class="chip ${settings.water === h ? 'on' : ''}" onclick="setWaterRem(${h})">${h ? t('everyH', h) : t('off')}</button>`).join('')}</div>
     </div>
     <div class="card"><h3>❓ ${t('faqTitle')}</h3>${t('faq').split('|').map(q => { const [a, b] = q.split('=>'); return `<details class="faq"><summary>${a}</summary><p>${b}</p></details>`; }).join('')}</div>
-    <div class="card"><h3>ℹ️ ${t('about')}</h3><p class="hint">${t('aboutText')}</p>
+    <div class="card"><h3>ℹ️ ${t('about')}</h3><p class="hint">${t('aboutText')}</p><p class="hint">${t('aiCredit')}</p>
       <button class="btn ghost danger" onclick="askReset()">${t('reset')}</button></div>`;
   }
   return `

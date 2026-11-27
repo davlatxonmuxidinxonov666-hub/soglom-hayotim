@@ -342,7 +342,7 @@ function makePlan(target, seed) {
     meals[m] = opts[rnd(opts.length)].map(([id, g]) => ({ id, g }));
     meals[m].forEach(x => total += FOODS[x.id].kcal * x.g / 100);
   }
-  const factor = Math.min(1.7, Math.max(0.6, target / total));
+  const factor = Math.min(1.45, Math.max(0.6, target / total));
   let sum = 0;
   for (const m in meals) {
     meals[m] = meals[m].map(x => {
