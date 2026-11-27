@@ -45,20 +45,36 @@ classes = sorted(set(labels))
 say('yaratilgan rasmlar:', len(paths), {c: labels.count(c) for c in classes})
 
 # 2) "Boshqa ovqat" — ISSAI bazasidan (chuchvaraga o'xshash tushpara sinflari chiqarib tashlanadi)
-if CAFSD.endswith('.zip') and os.path.exists(CAFSD):
+z = None
+if CAFSD.startswith('http'):
+    # Butun arxivni emas, faqat kerakli rasmlarni yuklab olish (HTTP Range)
+    try:
+        from remotezip import RemoteZip
+        z = RemoteZip(CAFSD, timeout=60)
+    except Exception as e:
+        say('ISSAI arxiviga ulanib bo\'lmadi:', e)
+elif CAFSD.endswith('.zip') and os.path.exists(CAFSD):
     import zipfile
     z = zipfile.ZipFile(CAFSD)
+if z is not None:
     allnames = z.namelist()
     imgs = [n for n in allnames if n.lower().endswith(('.jpg', '.jpeg', '.png')) and '/images/' in n]
     say('ISSAI arxivida rasmlar:', len(imgs))
     random.shuffle(imgs)
     nameset = set(allnames)
-    for n in imgs[:1500]:
-        z.extract(n, '/tmp/cafsd')
-        ln = n.replace('/images/', '/labels/').rsplit('.', 1)[0] + '.txt'
-        if ln in nameset:
-            z.extract(ln, '/tmp/cafsd')
-    CAFSD = '/tmp/cafsd'
+    got = 0
+    for n in imgs[:1300]:
+        try:
+            z.extract(n, '/tmp/cafsd')
+            got += 1
+            ln = n.replace('/images/', '/labels/').rsplit('.', 1)[0] + '.txt'
+            if ln in nameset:
+                z.extract(ln, '/tmp/cafsd')
+        except Exception as e:
+            say('xato', n, e)
+    say('ISSAI dan olindi:', got)
+CAFSD = '/tmp/cafsd'
+os.makedirs(CAFSD, exist_ok=True)
 names = open(os.path.join(OUT, 'labels.txt'), encoding='utf-8').read().split('\n')
 excl = {i for i, n in enumerate(names) if n.startswith('tushpara')}
 others = []
@@ -75,16 +91,20 @@ for p in glob.glob(os.path.join(CAFSD, '**', '*.jpg'), recursive=True) + glob.gl
 random.shuffle(others)
 others = others[:900]
 say('boshqa ovqat rasmlari:', len(others))
+ngen = len(paths)
 if others:
-    classes = classes + ['other']
+    if 'other' not in classes:
+        classes = classes + ['other']
     paths += others
     labels += ['other'] * len(others)
+is_gen = [True] * ngen + [False] * (len(paths) - ngen)
 
 idx = {c: i for i, c in enumerate(classes)}
 y = np.array([idx[l] for l in labels], dtype=np.int32)
 order = list(range(len(paths)))
 random.shuffle(order)
 paths = [paths[i] for i in order]
+is_gen = [is_gen[i] for i in order]
 y = y[order]
 
 # Har bir sinfdan ~15% tekshiruv uchun
@@ -93,6 +113,7 @@ for c in range(len(classes)):
     ids = np.where(y == c)[0]
     val_mask[ids[:max(2, int(len(ids) * 0.15))]] = True
 tr_p, tr_y = [p for p, m in zip(paths, val_mask) if not m], y[~val_mask]
+tr_g = [g for g, m in zip(is_gen, val_mask) if not m]
 va_p, va_y = [p for p, m in zip(paths, val_mask) if m], y[val_mask]
 say('sinflar:', classes, 'o\'qitish:', len(tr_p), 'tekshiruv:', len(va_p))
 
@@ -123,8 +144,8 @@ def augment(img, lab):
 
 tr = tf.data.Dataset.from_tensor_slices((tr_p, tr_y)).shuffle(2000).map(load, num_parallel_calls=4)
 # kam sinflarni ko'paytirish (oversampling): har bir yaratilgan rasm 8 marta, turli augmentatsiya bilan
-rep = tf.data.Dataset.from_tensor_slices(([p for p, l in zip(tr_p, tr_y) if classes[l] != 'other'],
-                                          np.array([l for l in tr_y if classes[l] != 'other'], dtype=np.int32))).map(load).repeat(8)
+rep = tf.data.Dataset.from_tensor_slices(([p for p, g in zip(tr_p, tr_g) if g],
+                                          np.array([l for l, g in zip(tr_y, tr_g) if g], dtype=np.int32))).map(load).repeat(8)
 tr = tr.concatenate(rep).shuffle(3000).map(augment, num_parallel_calls=4).batch(32).prefetch(2)
 va = tf.data.Dataset.from_tensor_slices((va_p, va_y)).map(load).batch(32)
 

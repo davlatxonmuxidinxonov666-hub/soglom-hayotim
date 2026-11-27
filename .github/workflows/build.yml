@@ -82,12 +82,12 @@ jobs:
       - name: O'zbek taomlari modelini o'qitish (MobileNetV3)
         if: steps.ucache.outputs.cache-hit != 'true' && hashFiles('app/src/main/assets/ai/labels.txt') != ''
         continue-on-error: true
+        timeout-minutes: 170
         run: |
           mkdir -p /tmp/m
-          pip install "tensorflow-cpu==2.18.0" "numpy<2" pillow > /tmp/m/log_uzpip.txt 2>&1 || { echo "::error::pip"; exit 1; }
-          curl -fL --retry 3 -o /tmp/cafsd.zip https://issai.nu.edu.kz/wp-content/themes/issai-new/data/models/CAFSD/CAFSD.zip > /tmp/m/log_uzdl.txt 2>&1 || echo "ISSAI arxivi yuklanmadi" >> /tmp/m/log_uzdl.txt
-          ls -la /tmp/cafsd.zip >> /tmp/m/log_uzdl.txt 2>&1 || true
-          python ai_data/train_uz.py app/src/main/assets/ai /tmp/cafsd.zip /tmp/m/log_uz.txt > /tmp/m/log_uztrain.txt 2>&1 || { rm -f app/src/main/assets/ai/uz.tflite app/src/main/assets/ai/uz_labels.txt; echo "::error::train"; exit 1; }
+          pip install "tensorflow-cpu==2.18.0" "numpy<2" pillow remotezip > /tmp/m/log_uzpip.txt 2>&1 || { echo "::error::pip"; exit 1; }
+          curl -sIL --max-time 60 https://issai.nu.edu.kz/wp-content/themes/issai-new/data/models/CAFSD/CAFSD.zip > /tmp/m/log_uzhead.txt 2>&1 || true
+          timeout 150m python ai_data/train_uz.py app/src/main/assets/ai https://issai.nu.edu.kz/wp-content/themes/issai-new/data/models/CAFSD/CAFSD.zip /tmp/m/log_uz.txt > /tmp/m/log_uztrain.txt 2>&1 || { rm -f app/src/main/assets/ai/uz.tflite app/src/main/assets/ai/uz_labels.txt; echo "::error::train"; exit 1; }
           ls -la app/src/main/assets/ai
 
       - name: APK yig'ish
