@@ -11,3 +11,5 @@ Kaloriya hisoblagich (o'zbek taomlari bilan), qadam hisoblagich, suv va vazn kun
 APK (har doim eng so'nggi versiya): https://github.com/davlatxonmuxidinxonov666-hub/soglom-hayotim/raw/apk/SoglomHayot.apk
 
 Har bir push'da GitHub avtomatik yig'adi.
+
+- Rasm orqali taomni aniqlash (telefon ichida, internetsiz): ISSAI Central Asian Food Scenes Dataset (CC BY 4.0) va YOLOv8 modellari (MIT).
