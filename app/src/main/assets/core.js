@@ -53,20 +53,33 @@ function key(w) {
     .replace(/§/g, 'sh').replace(/¤/g, 'ch');
 }
 
+// Matnni so'zlarga bo'lish. Har bir so'z uchun: o — asl yozilishi, raw — lotinchaga o'girilgan, k — solishtirish kaliti.
 function tokenize(text) {
-  let s = rawNorm(text)
+  let s = String(text).toLowerCase().replace(/[ʻʼ’‘`´']/g, "'")
     .replace(/(\d),(\d)/g, '$1.$2')
-    .replace(/(\d)([a-z])/g, '$1 $2')
-    .replace(/([a-z'])(\d)/g, '$1 $2')
+    .replace(/(\d)([^\d\s.,'])/gu, '$1 $2')
+    .replace(/([^\d\s.,])(\d)/gu, '$1 $2')
     .replace(/[+,;:!?()\n\r\/"«»]/g, ' , ')
     .replace(/\s[-–—]\s/g, ' , ')
+    .replace(/([^\d\s])-(?=[^\d\s])/gu, '$1 ')
     .replace(/\.(\s|$)/g, ' , ');
-  return s.split(/\s+/).filter(Boolean).map(w => {
-    if (w === ',') return { raw: ',', k: ',' };
-    const raw = w.replace(/^['-]+|['-]+$/g, '');
+  const out = [];
+  s.split(/\s+/).filter(Boolean).forEach(w => {
+    if (w === ',') { out.push({ raw: ',', k: ',', o: ',' }); return; }
+    const o = w.replace(/^['-]+|['-]+$/g, '');
+    const raw = rawNorm(o).replace(/^['-]+|['-]+$/g, '');
     const k = key(raw).replace(/[^a-z0-9.\-]/g, '');
-    return { raw, k };
-  }).filter(t => t.k !== '' && t.k !== '-');
+    if (k === '' || k === '-') return;
+    // "polkosy", "poltarelki", "пол-лепёшки" → "pol" + qolgan qism
+    const pm = k.match(/^pol-?(.{3,})$/);
+    if (pm && !/^(ovin|ozi|uch|ezn|ny|tor|dnik|sk|ent|ez)/.test(pm[1]) && (UNIT_RE.some(([, re]) => re.test(pm[1])) || /^(lepesh|tarel|kos|stakan|pial|ports|bank|butil|kusk|shampur)/.test(pm[1]))) {
+      out.push({ raw: 'pol', k: 'pol', o: o });
+      out.push({ raw: pm[1], k: pm[1], o: '' });
+      return;
+    }
+    out.push({ raw, k, o });
+  });
+  return out;
 }
 
 function buildIndex() {
@@ -97,10 +110,11 @@ function lev(a, b) {
   return d[a.length][b.length];
 }
 
-// 2 — aniq, 1 — o'zakdan/yaqin, 0 — mos emas
+// 3 — aniq, 2 — so'z to'liq + qo'shimcha ("лимон"+"ом"), 1 — o'zakdan/yaqin, 0 — mos emas
 function wmatch(sw, t) {
-  if (sw === t) return 2;
+  if (sw === t) return 3;
   if (/^\d/.test(sw) || /^\d/.test(t)) return 0;
+  if (sw.length >= 4 && t.startsWith(sw) && t.length <= sw.length + 3) return 2;
   if (sw.length >= 4) {
     const st = sw.slice(0, sw.length > 5 ? sw.length - 2 : sw.length - 1);
     if (t.startsWith(st) && t.length <= sw.length + 3) return 1;
@@ -111,20 +125,34 @@ function wmatch(sw, t) {
 
 function matchFood(toks, i, minWords, maxWords = 9) {
   let best = null;
+  const all = [];
   for (const s of SYN_INDEX) {
     const n = s.w.length;
     if (n < minWords || n > maxWords || i + n > toks.length) continue;
-    let exact = true, ok = true;
+    let exact = true, full = true, ok = true;
     for (let j = 0; j < n; j++) {
       const tk = toks[i + j].k;
       if (tk === ',') { ok = false; break; }
       const r = wmatch(s.w[j], tk);
       if (!r) { ok = false; break; }
-      if (r === 1) exact = false;
+      if (r < 3) exact = false;
+      if (r < 2) full = false;
     }
     if (!ok) continue;
-    const sc = n * 100 + (exact ? 50 : 0) + s.len;
-    if (!best || sc > best.sc) best = { sc, food: s.food, len: n };
+    const sc = n * 100 + (exact ? 50 : full ? 25 : 0) + s.len;
+    all.push({ sc, food: s.food, len: n, exact });
+    if (!best || sc > best.sc) best = { sc, food: s.food, len: n, exact };
+  }
+  if (best) {
+    // Boshqa ehtimoliy taomlar ("Siz buni nazarda tutdingizmi?")
+    const seen = new Set([best.food.id]);
+    best.alts = [];
+    all.sort((a, b) => b.sc - a.sc).forEach(c => {
+      if (seen.has(c.food.id) || c.len !== best.len) return;
+      if (c.sc < best.sc - (best.exact ? 0 : 40)) return;
+      seen.add(c.food.id);
+      if (best.alts.length < 3) best.alts.push(c.food);
+    });
   }
   return best;
 }
@@ -178,7 +206,7 @@ const UNIT_RE = [
   ['qoshiq', /^(koshik\w*|lojk\w*|lojech\w*|spoon\w*)$/, 1],
   ['choyqoshiq', /^(tsp)$/, 1],
   ['bolak', /^(bolak\w*|kus\w*|slice\w*|lomt\w*|tilim\w*|piece)$/, 1],
-  ['six', /^(sikh|shampur\w*|skewer\w*|six)$/, 1],
+  ['six', /^(sikh|shampur\w*|skewer\w*|six|palk\w*|paloch\w*|tayoqch\w*)$/, 1],
   ['hovuch', /^(xovuch\w*|gorst\w*|handful\w*)$/, 1],
   ['porsiya', /^(porsi\w*|portsi\w*|porci\w*|portion\w*|serving\w*)$/, 1],
   ['paket', /^(paket\w*|pachk\w*|pack\w*|sachet\w*)$/, 1],
@@ -200,18 +228,18 @@ const STOP = new Set(['ozbek','ozbekcha','uzbekskiy','uzbekskaya','uzbekskogo','
   'tushlik','tushlikka','tushlikda','nonushta','nonushtaga','nonushtada','kechki','ovkat','ovkatga','ovkatlandim','uchun','edi',
   'tamaddi','ozgina','kup','kop','juda','katta','kichik','dan','da','ga','ni','birga',
   'na','obed','obeda','zavtrak','zavtraka','ujin','ujina','poel','poela','poeli','sel','sela','seli','vipil','vipila','ya','mi',
-  'segodnya','utrom','vecherom','dnem','eshe','tolko','chut','nemnogo','bolshoy','bolshaya','malenkiy','kusochek',
+  'kakoy','kakoe','kakaya','kakie','to','eshe','eshyo','toje','tozhe','eto','bilo','byl','byla','esli','mnogo','malo','primerno','okolo','gde','tam','qandaydir','biroz','taxminan','some','about','around','segodnya','utrom','vecherom','dnem','perekus','perekusa','perekusil','perekusila','obedal','obedala','pouzhinal','uzhinal','zavtrakal','zavtrakala','poobedal','pozavtrakal','eshe','tolko','chut','nemnogo','bolshoy','bolshaya','malenkiy','kusochek',
   'ate','eat','had','drank','drink','for','lunch','breakfast','dinner','snack','some','a','an','the','of','my','i'].map(key));
 
 // Matndan taomlar ro'yxatini ajratib oladi
 function parseMeal(text) {
   const toks = tokenize(text);
   const items = [], unknown = [];
-  let pq = null, pu = null, pmul = 1, last = null;
+  let pq = null, pu = null, pmul = 1, last = null, ps = null;
   const push = (m, i) => {
-    const it = { food: m.food, q: pq, u: pu, mul: pmul };
+    const it = { food: m.food, q: pq, u: pu, mul: pmul, s: ps === null ? i : ps, e: i + m.len, alts: m.alts || [] };
     items.push(it);
-    last = it; pq = null; pu = null; pmul = 1;
+    last = it; pq = null; pu = null; pmul = 1; ps = null;
     return i + m.len;
   };
   // Keyingi taomning o'z miqdori bormi ("norin 300g bulochka 200g")
@@ -242,28 +270,32 @@ function parseMeal(text) {
     let m = matchFood(toks, i, 2);
     if (m) { i = push(m, i); continue; }
     if (tk.k === 'six' && pq === null && !(i > 0 && numberAt(toks, i - 1)) && toks[i+1] && matchFood(toks, i + 1, 1)) {
-      pq = 6; i++; continue;
+      pq = 6; if (ps === null) ps = i; i++; continue;
     }
     const n = numberAt(toks, i);
     if (n) {
       const trailing = last && last.q === null && pq === null && (!foodAhead(i + n.len) || (foodFirst && nextHasQty(i + n.len)));
-      if (trailing) { last.q = n.v; if (n.dona && !last.u) last.u = 'dona'; }
-      else { pq = n.v; if (n.dona) pu = 'dona'; }
+      if (trailing) { last.q = n.v; if (n.dona && !last.u) last.u = 'dona'; last.e = i + n.len; }
+      else { pq = n.v; if (n.dona) pu = 'dona'; if (ps === null) ps = i; }
       i += n.len; continue;
     }
     const u = unitAt(toks, i);
     if (u) {
-      if (last && last.u === null && pq === null && pu === null && (!foodAhead(i + u.len) || (foodFirst && nextHasQty(i + u.len)))) { last.u = u.unit; last.mul = u.mul; }
-      else { pu = u.unit; pmul = u.mul; }
+      if (last && last.u === null && pq === null && pu === null && (!foodAhead(i + u.len) || (foodFirst && nextHasQty(i + u.len)))) { last.u = u.unit; last.mul = u.mul; last.e = i + u.len; }
+      else { pu = u.unit; pmul = u.mul; if (ps === null) ps = i; }
       i += u.len; continue;
     }
     if (STOP.has(tk.k)) { i++; continue; }
     m = matchFood(toks, i, 1, 1);
     if (m) { i = push(m, i); continue; }
-    if (tk.k.length >= 3 && !/^\d/.test(tk.k)) unknown.push(tk.raw);
+    if (tk.k.length >= 3 && !/^\d/.test(tk.k)) unknown.push(tk.o || tk.raw);
     i++;
   }
-  return { items: items.map(resolve), unknown };
+  const srcOf = it => toks.slice(it.s, it.e).map(t => t.o).filter(Boolean).join(' ');
+  return {
+    items: items.map(it => Object.assign(resolve(it), { src: srcOf(it), alts: it.alts })),
+    unknown,
+  };
 }
 
 const GENERIC = { tarelka: 350, lagan: 350, kosa: 400, piyola: 200, stakan: 250, oshqoshiq: 15, choyqoshiq: 5,

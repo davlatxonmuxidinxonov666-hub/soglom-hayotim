@@ -1,5 +1,8 @@
 const I18N = {
 uz: {
+  orMaybe: 'Yoki bu:', notUnderstood: 'Tushunilmadi:', find: 'Topish', unknownHelp: "Bosing va bazadan to'g'ri taomni tanlang.", chooseFood: 'Taomni tanlang',
+  checkHint: "Tekshiring: har bir taom ostida qaysi so'zlardan tushunilgani yozilgan. Nomini bossangiz — boshqa taomga almashtirasiz.", addAnother: "Yana taom qo'shish",
+  frequent: "Tez-tez yeysiz", recent: 'Yaqinda', quickHint: "Bir bosishda tanlangan ovqatga qo'shiladi.", addedTo: "{0} → {1}",
   aiMaybe: "Balki bulardan biridir? Bosib qo'shing:", aiTeach: "Agar taom ro'yxatda bo'lmasa, yozib kiriting. Ilova hozircha 239 tur taomni taniydi; yangi taomlarni o'rgatish uchun rasmlar to'playmiz.",
   advNorm: "Tavsiya: ≈ {0} kkal (kunlik me'yorning {1}%)", canMore: 'Yana mumkin', overBy: 'Ortiqcha', variant: 'Variant',
   advPick: '≈ {0} kkal ga mos variantlar', advPickFull: "To'liq {0} kkal li variantlar", iAteThis: 'Shuni yedim', close: 'Yopish',
@@ -90,6 +93,9 @@ uz: {
   n_waterCh: 'Suv eslatmasi', n_waterTitle: 'Suv ichish vaqti 💧', n_waterText: 'Bir stakan suv iching',
 },
 ru: {
+  orMaybe: 'Или это:', notUnderstood: 'Не понял:', find: 'Найти', unknownHelp: 'Нажмите и выберите правильное блюдо из базы.', chooseFood: 'Выберите блюдо',
+  checkHint: 'Проверьте: под каждым блюдом написано, из каких слов оно понято. Нажмите на название, чтобы заменить на другое блюдо.', addAnother: 'Добавить ещё блюдо',
+  frequent: 'Часто едите', recent: 'Недавно', quickHint: 'Одно нажатие — и блюдо добавлено в выбранный приём пищи.', addedTo: '{0} → {1}',
   aiMaybe: 'Может быть, это одно из них? Нажмите, чтобы добавить:', aiTeach: 'Если блюда нет в списке — напишите его текстом. Пока приложение знает 239 видов еды; новые блюда добавим, когда соберём фото.',
   advNorm: 'Рекомендуется: ≈ {0} ккал ({1}% дневной нормы)', canMore: 'Можно ещё', overBy: 'Сверх нормы', variant: 'Вариант',
   advPick: 'Варианты на ≈ {0} ккал', advPickFull: 'Варианты на полные {0} ккал', iAteThis: 'Я это съел', close: 'Закрыть',
@@ -180,6 +186,9 @@ ru: {
   n_waterCh: 'Напоминание о воде', n_waterTitle: 'Время пить воду 💧', n_waterText: 'Выпейте стакан воды',
 },
 en: {
+  orMaybe: 'Or maybe:', notUnderstood: "Didn't understand:", find: 'Find', unknownHelp: 'Tap and pick the right food from the database.', chooseFood: 'Choose a food',
+  checkHint: 'Check it: under each food you can see which words it came from. Tap a name to swap it for another food.', addAnother: 'Add another food',
+  frequent: 'You eat often', recent: 'Recent', quickHint: 'One tap adds it to the selected meal.', addedTo: '{0} → {1}',
   aiMaybe: 'Maybe it is one of these? Tap to add:', aiTeach: "If your dish isn't listed, type it. The app knows 239 foods so far; new dishes will be added as we collect photos.",
   advNorm: 'Recommended: ≈ {0} kcal ({1}% of your daily target)', canMore: 'You can still eat', overBy: 'Over by', variant: 'Option',
   advPick: 'Options for ≈ {0} kcal', advPickFull: 'Options for the full {0} kcal', iAteThis: 'I ate this', close: 'Close',

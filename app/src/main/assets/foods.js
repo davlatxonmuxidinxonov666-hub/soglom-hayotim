@@ -9,7 +9,7 @@ shivit_osh|uz|190,6,8,23|Shivit oshi|Шивит оши (зелёный плов)
 mastava|uz|75,4,3,8|Mastava|Мастава|Mastava (rice soup)|mastava,мастава,маставу,mastava sho'rva|kosa:400|h
 moshkichiri|uz|130,6,4,18|Moshkichiri|Мошкичири|Moshkichiri (mung bean rice)|moshkichiri,moshkichir,mashkichiri,mashkichir,moshkichri,мошкичири,мошкичир,машкичири,машкичир|tarelka:350|h
 moshxorda|uz|65,3.5,2.5,7.5|Mosh xo'rda|Машхурда|Mosh xo'rda (mung bean soup)|moshxo'rda,mosh xo'rda,mashxurda,mashhurda,moshxurda,машхурда,мошхурда,мошхўрда|kosa:400|h
-shurva|uz|60,4,3.5,3.5|Sho'rva|Шурпа|Shurpa (meat soup)|sho'rva,shorva,shurva,shurpa,шурпа,шорва,шўрва,sorpa,go'sht sho'rva,qaynatma,qaynatma sho'rva|kosa:450|h
+shurva|uz|60,4,3.5,3.5|Sho'rva|Шурпа|Shurpa (meat soup)|sho'rva,shorva,shurva,shurpa,шурпа,шорва,шўрва,sorpa,go'sht sho'rva,qaynatma,qaynatma sho'rva,суп,супа,супчик,sup,soup|kosa:450|h
 lagmon|uz|140,7,5.5,16|Lag'mon|Лагман|Lagman (noodle soup)|lag'mon,lagmon,lagman,лагман,лагмон,uyg'ur lag'mon|kosa:450|
 qovurma_lagmon|uz|200,8,9,22|Qovurma lag'mon|Жареный лагман|Fried lagman|qovurma lag'mon,qovurma lagman,жареный лагман,босо лагман,boso lagman,gyuro lagman|tarelka:350|
 manti|uz|210,10,11,18|Manti|Манты|Manti (dumplings)|manti,manty,манты,манти,мантов|dona:55,tarelka:300|
@@ -34,7 +34,7 @@ tovuq_shashlik|uz|165,24,7,1|Tovuq shashlik|Куриный шашлык|Chicken 
 tuxum_barak|uz|190,8,10,17|Tuxum barak|Тухум барак|Tukhum barak (egg dumplings)|tuxum barak,barak,тухум барак,барак|tarelka:250|
 qatlama|uz|380,7,22,40|Qatlama|Катлама|Katlama (layered flatbread)|qatlama,катлама,katlama|dona:100|
 sumalak|uz|230,4,1,52|Sumalak|Сумаляк|Sumalak|sumalak,сумаляк,сумалак|piyola:150|
-achchiq_chuchuk|salad|30,1,1.5,3.5|Achchiq-chuchuk|Ачичук|Achichuk (tomato-onion salad)|achchiq chuchuk,achchiq-chuchuk,achichuk,ачичук,салат ачичук,salat achchiq chuchuk,achchiq chuchuk salat,аччик чучук,shakarob,шакароб|tarelka:200|h
+achchiq_chuchuk|salad|30,1,1.5,3.5|Achchiq-chuchuk|Ачичук|Achichuk (tomato-onion salad)|achchiq chuchuk,achchiq-chuchuk,achichuk,ачичук,achiq chuchuk,ачиқ чучук,ачик чучук,салат ачичук,salat achchiq chuchuk,achchiq chuchuk salat,аччик чучук,shakarob,шакароб|tarelka:200|h
 qurt|dairy|290,32,15,6|Qurt|Курт|Kurt (dried cheese balls)|qurt,kurt,курт|dona:10|
 chalob|uz|25,1.5,1.2,2|Chalob|Чалоп|Chalop (cold yogurt soup)|chalob,chalop,чалоп,чалоб|kosa:350|h
 gumma|non|300,8,15,33|Gumma (pirojki)|Пирожки (гумма)|Fried pirozhki|gumma,гумма,pirojki,пирожки,пирожок,пирожка|dona:80|
@@ -48,7 +48,7 @@ navvot|sweet|390,0,0,98|Navvot|Нават|Navat (crystal sugar)|navvot,navat,н�
 non|non|260,8.5,1.5,52|Non (obi non)|Лепёшка|Uzbek flatbread|non,obi non,tandir non,лепешка,лепешки,лепёшка,lepeshka,bread,flatbread|bolak:60,dona:300|
 patir|non|330,8,11,50|Patir non|Патыр|Patir (rich flatbread)|patir,патыр,патир|bolak:60,dona:300|
 qora_non|non|210,7,1.3,41|Qora non|Чёрный хлеб|Rye bread|qora non,черный хлеб,черного хлеба,бородинский,rye bread|bolak:30|h
-oq_non|non|260,8,3,49|Oq non (baton)|Белый хлеб (батон)|White bread|baton,buxanka,батон,белый хлеб,хлеб,хлеба,white bread,oq non|bolak:30|
+oq_non|non|260,8,3,49|Oq non (baton)|Белый хлеб (батон)|White bread|baton,buxanka,батон,белый хлеб,хлеб,хлеба,white bread,oq non,toast,тост,тосты,tost|bolak:30|
 makaron|garnish|140,5,1,28|Makaron (qaynatilgan)|Макароны (варёные)|Pasta (boiled)|makaron,makaronlar,макароны,макарон,spagetti,спагетти,pasta|tarelka:250|
 grechka|garnish|110,4,1,21|Grechka|Гречка|Buckwheat|grechka,гречка,гречки,гречневая каша,buckwheat,marjumak|tarelka:200|h
 guruch|garnish|130,2.7,0.3,28|Guruch (qaynatilgan)|Рис (варёный)|Rice (boiled)|guruch,рис,риса,rice|tarelka:200|h

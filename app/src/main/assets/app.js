@@ -431,6 +431,7 @@ function renderFood() {
     ${curDate !== todayStr() ? `<p class="hint">📅 ${dateLabel(curDate)}</p>` : ''}
     ${aiOn() ? `<div class="aibox"><button class="btn primary cam" onclick="aiPhoto(true)">📷 ${t('aiCamera')}</button><button class="btn ghost gal" onclick="aiPhoto(false)">🖼️</button></div>
     <p class="hint center">${t('aiOr')}</p>` : ''}
+    ${quickBlock()}
     <div class="stepLbl"><i>1</i>${t('step1')}</div>
     <textarea id="mealText" rows="3" placeholder="${esc(t('placeholder'))}"></textarea>
     <div class="chips ex"><span class="exl">${t('tryEx')}</span>${ex.map(e => `<button class="chip light" onclick="useEx(this)">${esc(e)}</button>`).join('')}</div>
@@ -469,7 +470,8 @@ function renderParsed() {
   if (!out || !parsed) return;
   if (!parsed.items.length) {
     if (parsed.thumb) { out.innerHTML = `<div class="res warnbox"><img class="thumb" src="${parsed.thumb}">${t('aiNothing')}${parsed.unknown.length ? '<br>' + t('aiSaw') + ': <b>' + esc(parsed.unknown.join(', ')) + '</b>' : ''}</div>${guessChips()}`; return; }
-    out.innerHTML = `<div class="res warnbox">${t('notFound')}${parsed.unknown.length ? ': <b>' + esc(parsed.unknown.join(', ')) + '</b>' : ''}<br>${t('notFoundHint')}</div>`;
+    out.innerHTML = `<div class="res warnbox">${t('notFound')}${parsed.unknown.length ? ': <b>' + esc(parsed.unknown.join(', ')) + '</b>' : ''}<br>${t('notFoundHint')}
+      <div class="chips">${parsed.unknown.map((w, k) => `<button class="chip mini warnchip" onclick="pFind(${k})">«${esc(w)}» · 🔎 ${t('find')}</button>`).join('')}</div></div>`;
     return;
   }
   let sum = 0, rows = '';
@@ -477,16 +479,28 @@ function renderParsed() {
     const g = gramsOf(it.food, it.qty, it.unit);
     const n = nutr(it.food, g);
     sum += n.kcal;
+    const f = it.food, du = f.def;
+    const presets = [[0.5, du], [1, du], [2, du], [100, 'g']].filter(([q, u]) => !(u === du && f.portions[du] < 20 && q === 0.5));
     rows += `<div class="prow">
-      <div class="pname">${esc(fname(it.food))}${it.ai ? ` <em class="aiconf">🤖 ${it.ai}%</em>` : ''}<small>${n.g} ${t('gr')} · ${t('pfc', Math.round(n.p), Math.round(n.f), Math.round(n.c))}</small></div>
+      <i class="av c-${f.cat}">${CAT_ICON[f.cat]}</i>
+      <div class="pname" onclick="pReplace(${i})">${esc(fname(f))} <span class="swap">⇄</span>${it.ai ? ` <em class="aiconf">🤖 ${it.ai}%</em>` : ''}
+        ${it.src ? `<small class="src">✍️ «${esc(it.src)}»</small>` : ''}
+        <small>${n.g} ${t('gr')} · ${t('pfc', Math.round(n.p), Math.round(n.f), Math.round(n.c))}</small></div>
       <div class="pk">${fmt(n.kcal)}<small>${t('kcal')}</small></div>
       <button class="x" onclick="pDel(${i})">×</button>
-      <div class="pctl"><input type="number" inputmode="decimal" min="0" step="${it.unit === 'g' ? 10 : 0.5}" value="${it.qty}" onchange="pEdit(${i},'qty',this.value)">
-      <select onchange="pEdit(${i},'unit',this.value)">${unitOptions(it.food, it.unit)}</select></div></div>`;
+      <div class="pctl"><button class="pm" onclick="pStep(${i},-1)">−</button>
+        <input type="number" inputmode="decimal" min="0" step="${it.unit === 'g' ? 10 : 0.5}" value="${it.qty}" onchange="pEdit(${i},'qty',this.value)">
+        <button class="pm" onclick="pStep(${i},1)">+</button>
+        <select onchange="pEdit(${i},'unit',this.value)">${unitOptions(f, it.unit)}</select></div>
+      <div class="chips presets">${presets.map(([q, u]) => `<button class="chip mini ${it.qty === q && it.unit === u ? 'on' : ''}" onclick="pSet(${i},${q},'${u}')">${u === 'g' ? q + ' ' + t('gr') : (q === 0.5 ? '½' : q) + ' ' + unitName(u)}</button>`).join('')}</div>
+      ${it.alts && it.alts.length ? `<div class="alts">${t('orMaybe')} ${it.alts.map((a, k) => `<button class="chip mini alt" onclick="pAlt(${i},${k})">${esc(fname(a))}</button>`).join('')}</div>` : ''}
+    </div>`;
   });
-  out.innerHTML = `<div class="res pop">${parsed.thumb ? `<div class="aihead"><img class="thumb" src="${parsed.thumb}"><p>${t('aiCheck')}</p></div>` : ''}${rows}
-    ${parsed.unknown.length ? `<p class="hint">❓ ${t('unknownWords')}: <b>${esc(parsed.unknown.join(', '))}</b> — ${t('unknownHint')}</p>` : ''}
+  const unk = parsed.unknown.length ? `<div class="unk"><b>❓ ${t('notUnderstood')}</b>${parsed.unknown.map((w, k) => `<button class="chip mini warnchip" onclick="pFind(${k})">«${esc(w)}» · 🔎 ${t('find')}</button>`).join('')}<p class="hint">${t('unknownHelp')}</p></div>` : '';
+  out.innerHTML = `<div class="res pop">${parsed.thumb ? `<div class="aihead"><img class="thumb" src="${parsed.thumb}"><p>${t('aiCheck')}</p></div>` : `<p class="hint checkhint">👀 ${t('checkHint')}</p>`}${rows}
+    ${unk}
     ${guessChips()}
+    <button class="btn ghost small addmore" onclick="pFind(-1)">+ ${t('addAnother')}</button>
     <div class="ptotal"><span>${t('total')}</span><b>${fmt(sum)} ${t('kcal')}</b></div>
     <button class="btn primary" onclick="addParsed()">✓ ${t('addTo', t('meal_' + selMeal))}</button></div>`;
 }
@@ -500,6 +514,65 @@ function addGuess(i) {
   parsed.items.push(r);
   renderParsed();
 }
+function pStep(i, d) {
+  const it = parsed.items[i];
+  const step = it.unit === 'g' ? 50 : 0.5;
+  it.qty = Math.max(0, Math.round((it.qty + d * step) * 10) / 10);
+  if (it.qty === 0) it.qty = step;
+  renderParsed();
+}
+function pSet(i, q, u) { const it = parsed.items[i]; it.qty = q; it.unit = u; renderParsed(); }
+function swapFood(it, f) {
+  const g = gramsOf(it.food, it.qty, it.unit);
+  const keepUnit = it.unit !== 'g' && f.portions[it.unit];
+  it.food = f;
+  if (!keepUnit) {
+    if (it.unit === 'g') it.qty = Math.round(g);
+    else { it.unit = f.def; it.qty = it.qty || 1; }
+  }
+  it.alts = [];
+  it.ai = 0;
+}
+function pAlt(i, k) {
+  const it = parsed.items[i];
+  const old = it.food;
+  const f = it.alts[k];
+  swapFood(it, f);
+  it.alts = [old];
+  renderParsed();
+}
+function pReplace(i) { openPicker(fname(parsed.items[i].food), f => { swapFood(parsed.items[i], f); renderParsed(); }); }
+function pFind(k) {
+  const word = k >= 0 ? parsed.unknown[k] : '';
+  openPicker(word, f => {
+    if (k >= 0) parsed.unknown.splice(k, 1);
+    const r = resolve({ food: f, q: null, u: null, mul: 1 });
+    r.src = word;
+    r.alts = [];
+    parsed.items.push(r);
+    renderParsed();
+  });
+}
+// Taom tanlash oynasi (qidiruv bilan)
+let pickCb = null;
+function openPicker(q, cb) {
+  pickCb = cb;
+  openModal(`<h2>🔎 ${t('chooseFood')}</h2>
+    <input id="pickQ" class="inp search" placeholder="${esc(t('search'))}" value="${esc(q || '')}" oninput="renderPick()">
+    <div id="pickList" class="picklist"></div>
+    <button class="btn ghost" onclick="closeModal()">${t('cancel')}</button>`);
+  renderPick();
+  setTimeout(() => { const e = $('#pickQ'); if (e) { e.focus(); e.select(); } }, 300);
+}
+function renderPick() {
+  const q = $('#pickQ').value;
+  let list = searchFoods(q, 'all');
+  if (!list.length && q.trim().length > 3) list = searchFoods(q.trim().slice(0, -2), 'all');
+  $('#pickList').innerHTML = list.slice(0, 40).map(f => `<div class="litem" onclick="pickDone('${f.id}')"><i class="av c-${f.cat}">${CAT_ICON[f.cat]}</i><div><div class="fn">${esc(fname(f))}</div><div class="fs">1 ${unitName(f.def)} ≈ ${f.portions[f.def]} ${t('gr')}</div></div><div class="fk">${fmt(f.kcal * f.portions[f.def] / 100)}<small>${t('kcal')}</small></div></div>`).join('')
+    || `<p class="hint">${t('nothing')}</p><button class="btn ghost small" onclick="closeModal();openCustom()">+ ${t('customFood')}</button>`;
+}
+function pickDone(id) { const cb = pickCb; closeModal(); if (cb) cb(FOODS[id]); }
+
 function pEdit(i, k, v) {
   const it = parsed.items[i];
   if (k === 'qty') it.qty = Math.max(0, parseFloat(String(v).replace(',', '.')) || 0);
@@ -511,6 +584,42 @@ function pEdit(i, k, v) {
   renderParsed();
 }
 function pDel(i) { parsed.items.splice(i, 1); renderParsed(); }
+
+// Tez-tez va yaqinda yeyilgan taomlar — bir bosishda qo'shish
+let QUICK = [];
+function quickFoods() {
+  const map = {};
+  Object.keys(days).forEach(d => (days[d].food || []).forEach(x => {
+    if (!FOODS[x.id]) return;
+    const u = x.u || 'g', q = u === 'g' ? x.g : x.q;
+    const k = x.id + '|' + q + '|' + u;
+    const m = map[k] || (map[k] = { id: x.id, q, u, n: 0, ts: 0 });
+    m.n++; m.ts = Math.max(m.ts, x.ts || 0);
+  }));
+  const all = Object.values(map);
+  const freq = all.filter(m => m.n >= 2).sort((a, b) => b.n - a.n || b.ts - a.ts).slice(0, 6);
+  const recent = all.filter(m => !freq.includes(m)).sort((a, b) => b.ts - a.ts).slice(0, 6 - Math.min(freq.length, 3));
+  return { freq, recent };
+}
+function quickBlock() {
+  const { freq, recent } = quickFoods();
+  if (!freq.length && !recent.length) return '';
+  QUICK = freq.concat(recent);
+  const chip = (m, i) => { const f = FOODS[m.id]; const g = gramsOf(f, m.q, m.u);
+    return `<button class="chip quick" onclick="quickAdd(${i})"><b>${esc(fname(f))}</b><small>${m.u === 'g' ? m.q + ' ' + t('gr') : amountText(m.q, m.u)} · ${fmt(nutr(f, g).kcal)} ${t('kcal')}</small></button>`; };
+  return `<div class="quickbox">
+    ${freq.length ? `<div class="qlbl">⭐ ${t('frequent')}</div><div class="chips">${freq.map((m, i) => chip(m, i)).join('')}</div>` : ''}
+    ${recent.length ? `<div class="qlbl">🕘 ${t('recent')}</div><div class="chips">${recent.map((m, i) => chip(m, i + freq.length)).join('')}</div>` : ''}
+    <p class="hint">${t('quickHint')}</p></div>`;
+}
+function quickAdd(i) {
+  const m = QUICK[i], f = FOODS[m.id];
+  const g = gramsOf(f, m.q, m.u);
+  pushFood(f, g, selMeal, m.u === 'g' ? 0 : m.q, m.u);
+  save();
+  celebrate(nutr(f, g).kcal);
+  toast(t('addedTo', fname(f), t('meal_' + selMeal)), t('undo'), () => { day(curDate).food.pop(); save(); render(); });
+}
 
 function amountText(qty, unit) {
   return unit === 'g' ? '' : (qty % 1 ? qty.toString().replace('.', ',') : qty) + ' ' + unitName(unit);
@@ -533,12 +642,10 @@ function addParsed() {
   celebrate(sum);
 }
 
-function renderFoodList() {
-  const el = $('#foodList');
-  if (!el) return;
-  const q = foodQuery.trim();
+function searchFoods(q, cat) {
   let list = FOOD_LIST;
-  if (foodCat !== 'all') list = list.filter(f => f.cat === foodCat);
+  if (cat && cat !== 'all') list = list.filter(f => f.cat === cat);
+  q = (q || '').trim();
   if (q) {
     const toks = tokenize(q).filter(x => x.k !== ',');
     if (toks.length) {
@@ -548,6 +655,12 @@ function renderFoodList() {
       });
     }
   }
+  return list;
+}
+function renderFoodList() {
+  const el = $('#foodList');
+  if (!el) return;
+  const list = searchFoods(foodQuery, foodCat);
   el.innerHTML = list.slice(0, 80).map(f => {
     const pg = f.portions[f.def];
     return `<div class="litem" onclick="openFood('${f.id}')"><i class="av c-${f.cat}">${CAT_ICON[f.cat]}</i><div><div class="fn">${esc(fname(f))}</div>

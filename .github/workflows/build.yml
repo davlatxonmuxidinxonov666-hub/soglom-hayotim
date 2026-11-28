@@ -23,6 +23,9 @@ jobs:
         with:
           gradle-version: '8.9'
 
+      - name: Matnni tushunish testlari (169+ misol)
+        run: node tests/parser_test.js
+
       - name: ISSAI modeli keshi
         id: mcache
         uses: actions/cache@v4
